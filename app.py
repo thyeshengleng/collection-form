@@ -281,14 +281,30 @@ else:  # View/Edit Records
                         st.warning("Please select only one record to edit")
             
             with col2:
-                if st.button("🗑️ Delete Selected", use_container_width=True):
-                    if len(selected_rows) > 0:
-                        confirm = st.button("⚠️ Confirm Delete")
-                        if confirm:
+                # Initialize delete confirmation state
+                if 'delete_confirmation' not in st.session_state:
+                    st.session_state.delete_confirmation = False
+                
+                # Show delete button
+                if not st.session_state.delete_confirmation:
+                    if st.button("🗑️ Delete Selected", use_container_width=True):
+                        st.session_state.delete_confirmation = True
+                        st.rerun()
+                
+                # Show confirmation button
+                if st.session_state.delete_confirmation:
+                    col3, col4 = st.columns(2)
+                    with col3:
+                        if st.button("⚠️ Confirm", use_container_width=True):
                             for idx in selected_rows.index:
                                 df = delete_record(idx)
                             st.success(f"Deleted {len(selected_rows)} record(s)")
+                            st.session_state.delete_confirmation = False
                             time.sleep(1)
+                            st.rerun()
+                    with col4:
+                        if st.button("Cancel", use_container_width=True):
+                            st.session_state.delete_confirmation = False
                             st.rerun()
 
         # Edit form
