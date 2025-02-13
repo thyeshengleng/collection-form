@@ -1,4 +1,12 @@
+# Ignore data files
+*.csv
+*.pdf
+
+# Ignore system files
 __pycache__/
 .streamlit/
 *.pyc
-.env 
+.env
+.DS_Store
+.wrangler/
+node_modules/ 
