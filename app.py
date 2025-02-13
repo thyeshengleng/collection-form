@@ -243,7 +243,7 @@ else:  # View/Edit Records
         ]].copy()
         
         # Display selectable table
-        selection = st.data_editor(
+        selected = st.data_editor(
             view_df,
             hide_index=False,
             use_container_width=True,
@@ -258,29 +258,31 @@ else:  # View/Edit Records
                 ),
             },
             disabled=view_df.columns.tolist(),  # Make all columns read-only
+            num_rows="fixed",
             key="data_editor"
         )
 
-        # Get selected index from the selection
-        if selection is not None and len(selection.index) > 0:
-            selected_index = selection.index[0]
-            
-            # Show action buttons
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                if st.button("✏️ Edit", use_container_width=True):
-                    st.session_state.edit_mode = True
-                    st.session_state.selected_record = selected_index
-                    st.rerun()
-            
-            with col2:
-                if st.button("🗑️ Delete", use_container_width=True):
-                    if st.button("⚠️ Confirm"):
-                        df = delete_record(selected_index)
-                        st.success("Record deleted successfully!")
-                        time.sleep(1)
+        # Show action buttons if a row is selected
+        if "edited_rows" in st.session_state["data_editor"]:
+            edited_rows = st.session_state["data_editor"]["edited_rows"]
+            if edited_rows:
+                selected_index = list(edited_rows.keys())[0]
+                
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    if st.button("✏️ Edit", use_container_width=True):
+                        st.session_state.edit_mode = True
+                        st.session_state.selected_record = selected_index
                         st.rerun()
+                
+                with col2:
+                    if st.button("🗑️ Delete", use_container_width=True):
+                        if st.button("⚠️ Confirm"):
+                            df = delete_record(selected_index)
+                            st.success("Record deleted successfully!")
+                            time.sleep(1)
+                            st.rerun()
 
 # Show success message if set
 if st.session_state.show_success_message:
