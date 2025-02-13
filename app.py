@@ -243,9 +243,9 @@ else:  # View/Edit Records
         ]].copy()
         
         # Display interactive table
-        selected_row = st.data_editor(
+        selected_indices = st.data_editor(
             view_df,
-            hide_index=True,
+            hide_index=False,  # Show index to track selection
             use_container_width=True,
             num_rows="dynamic",
             column_config={
@@ -255,31 +255,27 @@ else:  # View/Edit Records
                 "Status": st.column_config.TextColumn("Status", width="small"),
             },
             key="data_editor"
-        )
+        ).index.tolist()  # Get selected indices directly
 
         # Show action buttons
         col1, col2 = st.columns(2)
         
         with col1:
             if st.button("✏️ Edit Selected", use_container_width=True):
-                # Find the selected row in the original DataFrame
-                selected_company = selected_row.get("Company Name")
-                if selected_company:
-                    selected_index = df[df["Company Name"] == selected_company].index[0]
+                if selected_indices:
                     st.session_state.edit_mode = True
-                    st.session_state.selected_record = selected_index
+                    st.session_state.selected_record = selected_indices[0]
                     st.rerun()
                 else:
                     st.warning("Please select a record to edit")
         
         with col2:
             if st.button("🗑️ Delete Selected", use_container_width=True):
-                selected_company = selected_row.get("Company Name")
-                if selected_company:
+                if selected_indices:
                     if st.button("⚠️ Confirm Delete"):
-                        selected_index = df[df["Company Name"] == selected_company].index[0]
-                        df = delete_record(selected_index)
-                        st.success("Record deleted successfully!")
+                        for idx in sorted(selected_indices, reverse=True):
+                            df = delete_record(idx)
+                        st.success(f"Deleted {len(selected_indices)} record(s)")
                         time.sleep(1)
                         st.rerun()
                 else:
