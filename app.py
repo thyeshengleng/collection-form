@@ -304,8 +304,93 @@ else:  # View/Edit Records
                 index=0 if record["User Type"] == "New User" else 1
             )
             
-            # Rest of your edit form code...
-            # (All the fields and save/cancel buttons)
+            # Company Information
+            company_name = st.text_input("COMPANY NAME *", value=record["Company Name"])
+            email = st.text_input("EMAIL *", value=record["Email"])
+            address = st.text_area("ADDRESS *", value=record["Address"])
+            business_info = st.text_input("BUSINESS INFO *", value=record["Business Info"])
+            tax_id = st.text_input("TAX ID *", value=record["Tax ID"])
+            
+            # E-Invoice Start Date
+            try:
+                default_date = datetime.strptime(record["E-Invoice Start Date"], "%Y-%m-%d").date()
+            except:
+                default_date = datetime.now().date()
+            e_invoice_start_date = st.date_input("E-INVOICE START DATE *", value=default_date)
+            
+            # Plug in Module
+            st.subheader("PLUG IN MODULE *")
+            plugin_options = [
+                "Deposit Plugin",
+                "Fix Asset Plugin",
+                "Shipment Plugin",
+                "Stock Request Plugin",
+                "Doc Control Plugin"
+            ]
+            existing_plugins = record["Plug In Module"].split(", ") if record["Plug In Module"] else []
+            selected_plugins = []
+            for plugin in plugin_options:
+                if st.checkbox(plugin, key=f"edit_plugin_{plugin}", value=plugin in existing_plugins):
+                    selected_plugins.append(plugin)
+            
+            # Additional Information
+            vpn_info = st.text_input("VPN INFO *", value=record["VPN Info"])
+            module_license = st.text_input("MODULE & USER LICENSE *", value=record["Module & User License"])
+            
+            # Report Design Template
+            st.markdown("### REPORT DESIGN TEMPLATE *")
+            report_options = ["SO", "DO", "INV", "PO", "PICKING LIST"]
+            existing_reports = record["Report Design Template"].split(", ") if record["Report Design Template"] else []
+            selected_reports = []
+            report_cols = st.columns(2)
+            for idx, report in enumerate(report_options):
+                with report_cols[idx % 2]:
+                    if st.checkbox(report, key=f"edit_report_{report}", value=report in existing_reports):
+                        selected_reports.append(report)
+            
+            # Migration Information
+            migration_master = st.text_input("MIGRATION MASTER DATA *", value=record["Migration Master Data"])
+            migration_outstanding = st.text_input("MIGRATION (OUTSTANDING BALANCE) *", value=record["Migration Outstanding Balance"])
+            
+            # Status
+            status = st.selectbox(
+                "Status *",
+                ["pending", "complete", "AR/Ap, Stock pending"],
+                index=["pending", "complete", "AR/Ap, Stock pending"].index(record["Status"])
+            )
+            
+            # Save/Cancel buttons
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("Save Changes", use_container_width=True):
+                    updated_data = {
+                        "User Type": user_type,
+                        "Company Name": company_name,
+                        "Email": email,
+                        "Address": address,
+                        "Business Info": business_info,
+                        "Tax ID": tax_id,
+                        "E-Invoice Start Date": e_invoice_start_date.strftime("%Y-%m-%d"),
+                        "Plug In Module": ", ".join(selected_plugins),
+                        "VPN Info": vpn_info,
+                        "Module & User License": module_license,
+                        "Report Design Template": ", ".join(selected_reports),
+                        "Migration Master Data": migration_master,
+                        "Migration Outstanding Balance": migration_outstanding,
+                        "Status": status
+                    }
+                    df = update_record(st.session_state.selected_record, updated_data)
+                    st.success(f"✅ Record for {company_name} updated successfully!")
+                    time.sleep(1)
+                    st.session_state.edit_mode = False
+                    st.session_state.selected_record = None
+                    st.rerun()
+            
+            with col2:
+                if st.button("Cancel", use_container_width=True):
+                    st.session_state.edit_mode = False
+                    st.session_state.selected_record = None
+                    st.rerun()
 
 # Show success message if set
 if st.session_state.show_success_message:
