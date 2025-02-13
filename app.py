@@ -235,162 +235,37 @@ else:  # View/Edit Records
         
         st.subheader("Existing Records")
         
-        # Create a view DataFrame with all columns
-        view_df = df[[
-            "Company Name", 
-            "User Type", 
-            "Email", 
-            "Address",
-            "Business Info",
-            "Tax ID",
-            "E-Invoice Start Date",
-            "Plug In Module",
-            "VPN Info",
-            "Module & User License",
-            "Report Design Template",
-            "Migration Master Data",
-            "Migration Outstanding Balance",
-            "Status"
-        ]].copy()
+        # Create columns for the table and buttons
+        table_col, button_col = st.columns([4, 1])
         
-        # Add action buttons column
-        col1, col2 = st.columns([4, 1])
-        with col1:
+        with table_col:
             # Display the main table
             st.dataframe(
-                view_df,
+                df[[
+                    "Company Name", 
+                    "User Type", 
+                    "Email", 
+                    "Status"
+                ]],
                 hide_index=True,
                 use_container_width=True
             )
         
-        with col2:
-            # Display action buttons in a separate column
+        with button_col:
+            # Display action buttons for each record
             for idx in range(len(df)):
-                st.write("")  # Add spacing
-                col_edit, col_delete = st.columns(2)
-                with col_edit:
-                    if st.button("✏️", key=f"edit_{idx}", help="Edit"):
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("✏️", key=f"edit_{idx}"):
                         st.session_state.edit_mode = True
                         st.session_state.selected_record = idx
                         st.rerun()
-                with col_delete:
-                    if st.button("🗑️", key=f"delete_{idx}", help="Delete"):
-                        df = delete_record(idx)
-                        st.success("Record deleted successfully!")
-                        st.rerun()
-                st.write("---")
-        
-        # Edit mode
-        if st.session_state.edit_mode and st.session_state.selected_record is not None:
-            record = df.iloc[st.session_state.selected_record]
-            
-            st.subheader(f"Edit Record: {record['Company Name']}")
-            
-            # User Type
-            user_type = st.radio(
-                "User Type *",
-                ["New User", "Existing User"],
-                index=0 if record["User Type"] == "New User" else 1
-            )
-            
-            # Company Information
-            company_name = st.text_input("COMPANY NAME *", value=record["Company Name"])
-            email = st.text_input("EMAIL *", value=record["Email"])
-            address = st.text_area("ADDRESS *", value=record["Address"])
-            business_info = st.text_input("BUSINESS INFO *", value=record["Business Info"])
-            tax_id = st.text_input("TAX ID *", value=record["Tax ID"])
-            
-            # E-Invoice Start Date
-            try:
-                default_date = datetime.strptime(record["E-Invoice Start Date"], "%Y-%m-%d").date()
-            except:
-                default_date = None
-            e_invoice_start_date = st.date_input("E-INVOICE START DATE *", value=default_date)
-            
-            # Plug in Module
-            st.subheader("PLUG IN MODULE *")
-            plugin_options = [
-                "Deposit Plugin",
-                "Fix Asset Plugin",
-                "Shipment Plugin",
-                "Stock Request Plugin",
-                "Doc Control Plugin"
-            ]
-            existing_plugins = record["Plug In Module"].split(", ") if isinstance(record["Plug In Module"], str) else []
-            selected_plugins = []
-            for plugin in plugin_options:
-                if st.checkbox(plugin, key=f"edit_plugin_{plugin}", value=plugin in existing_plugins):
-                    selected_plugins.append(plugin)
-            
-            # Additional Information
-            vpn_info = st.text_input("VPN INFO *", value=record["VPN Info"])
-            module_license = st.text_input("MODULE & USER LICENSE *", value=record["Module & User License"])
-            
-            # Report Design Template
-            st.markdown("### REPORT DESIGN TEMPLATE *")
-            report_options = ["SO", "DO", "INV", "PO", "PICKING LIST"]
-            existing_reports = record["Report Design Template"].split(", ") if record["Report Design Template"] else []
-            selected_reports = []
-            report_cols = st.columns(2)
-            for idx, report in enumerate(report_options):
-                with report_cols[idx % 2]:
-                    if st.checkbox(report, key=f"edit_report_{report}", value=report in existing_reports):
-                        selected_reports.append(report)
-            
-            # Migration Information
-            migration_master = st.text_input("MIGRATION MASTER DATA *", value=record["Migration Master Data"])
-            migration_outstanding = st.text_input("MIGRATION (OUTSTANDING BALANCE) *", 
-                                               value=record["Migration Outstanding Balance"])
-            
-            # Status
-            status = st.selectbox(
-                "Status *",
-                ["pending", "complete", "AR/Ap, Stock pending"],
-                index=["pending", "complete", "AR/Ap, Stock pending"].index(record["Status"])
-            )
-            
-            # Save/Cancel buttons
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("Save Changes", use_container_width=True):
-                    # Create updated record
-                    updated_data = {
-                        "User Type": user_type,
-                        "Company Name": company_name,
-                        "Email": email,
-                        "Address": address,
-                        "Business Info": business_info,
-                        "Tax ID": tax_id,
-                        "E-Invoice Start Date": e_invoice_start_date.strftime("%Y-%m-%d"),
-                        "Plug In Module": ", ".join(selected_plugins),
-                        "VPN Info": vpn_info,
-                        "Module & User License": module_license,
-                        "Report Design Template": ", ".join(selected_reports),
-                        "Migration Master Data": migration_master,
-                        "Migration Outstanding Balance": migration_outstanding,
-                        "Status": status
-                    }
-                    
-                    # Update record
-                    df = update_record(st.session_state.selected_record, updated_data)
-                    
-                    # Show success message
-                    st.success(f"✅ Record for {company_name} updated successfully!")
-                    
-                    # Add a delay before rerunning
-                    time.sleep(1)
-                    
-                    st.session_state.edit_mode = False
-                    st.session_state.selected_record = None
-                    st.rerun()
-            
-            with col2:
-                if st.button("Cancel", use_container_width=True):
-                    st.session_state.edit_mode = False
-                    st.session_state.selected_record = None
-                    st.rerun()
-    else:
-        st.info("No records found. Create a new record to get started.")
+                with col2:
+                    if st.button("🗑️", key=f"delete_{idx}"):
+                        if st.button("Confirm Delete", key=f"confirm_delete_{idx}"):
+                            df = delete_record(idx)
+                            st.success("Record deleted successfully!")
+                            st.rerun()
 
 # Show success message if set
 if st.session_state.show_success_message:
