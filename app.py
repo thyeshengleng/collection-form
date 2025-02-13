@@ -227,7 +227,6 @@ else:  # View/Edit Records
         search_term = st.text_input("Search by Company Name or Email", "")
         
         if search_term:
-            # Filter records based on search term
             df = df[
                 df["Company Name"].str.contains(search_term, case=False, na=False) |
                 df["Email"].str.contains(search_term, case=False, na=False)
@@ -235,11 +234,22 @@ else:  # View/Edit Records
         
         st.subheader("Existing Records")
         
-        # Create columns for the table and buttons
-        table_col, button_col = st.columns([4, 1])
+        # Add selection column to DataFrame
+        df_with_select = df.copy()
+        df_with_select.insert(0, "Select", False)
+        
+        # Create columns for table and actions
+        table_col, action_col = st.columns([4, 1])
         
         with table_col:
-            # Display the main table
+            # Display selectable table
+            selected_indices = []
+            for idx in range(len(df)):
+                selected = st.checkbox(f"Select {df.iloc[idx]['Company Name']}", key=f"select_{idx}")
+                if selected:
+                    selected_indices.append(idx)
+            
+            # Display the main data
             st.dataframe(
                 df[[
                     "Company Name", 
@@ -251,21 +261,24 @@ else:  # View/Edit Records
                 use_container_width=True
             )
         
-        with button_col:
-            # Display action buttons for each record
-            for idx in range(len(df)):
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.button("✏️", key=f"edit_{idx}"):
+        with action_col:
+            # Action buttons for selected records
+            if selected_indices:
+                if st.button("✏️ Edit Selected", key="edit_selected"):
+                    if len(selected_indices) == 1:
                         st.session_state.edit_mode = True
-                        st.session_state.selected_record = idx
+                        st.session_state.selected_record = selected_indices[0]
                         st.rerun()
-                with col2:
-                    if st.button("🗑️", key=f"delete_{idx}"):
-                        if st.button("Confirm Delete", key=f"confirm_delete_{idx}"):
+                    else:
+                        st.warning("Please select only one record to edit")
+                
+                if st.button("🗑️ Delete Selected", key="delete_selected"):
+                    if st.button("Confirm Delete", key="confirm_delete"):
+                        # Delete records in reverse order to maintain indices
+                        for idx in sorted(selected_indices, reverse=True):
                             df = delete_record(idx)
-                            st.success("Record deleted successfully!")
-                            st.rerun()
+                        st.success(f"Deleted {len(selected_indices)} record(s) successfully!")
+                        st.rerun()
 
 # Show success message if set
 if st.session_state.show_success_message:
