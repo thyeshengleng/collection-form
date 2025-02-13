@@ -234,50 +234,45 @@ else:  # View/Edit Records
         
         st.subheader("Existing Records")
         
-        # Add selection column to DataFrame
-        df_with_select = df.copy()
-        df_with_select.insert(0, "Select", False)
+        # Display the main table with selection
+        selected_indices = []
         
-        # Create columns for table and actions
-        table_col, action_col = st.columns([4, 1])
+        # Create two columns - one for data, one for actions
+        col1, col2 = st.columns([4, 1])
         
-        with table_col:
-            # Display selectable table
-            selected_indices = []
-            for idx in range(len(df)):
-                selected = st.checkbox(f"Select {df.iloc[idx]['Company Name']}", key=f"select_{idx}")
-                if selected:
-                    selected_indices.append(idx)
-            
-            # Display the main data
-            st.dataframe(
-                df[[
-                    "Company Name", 
-                    "User Type", 
-                    "Email", 
-                    "Status"
-                ]],
-                hide_index=True,
-                use_container_width=True
-            )
+        with col1:
+            # Display records with checkboxes
+            for idx, row in df.iterrows():
+                col_select, col_data = st.columns([1, 6])
+                with col_select:
+                    if st.checkbox("", key=f"select_{idx}"):
+                        selected_indices.append(idx)
+                with col_data:
+                    st.write(f"**{row['Company Name']}**")
+                    st.write(f"Email: {row['Email']}")
+                    st.write(f"Status: {row['Status']}")
+                st.divider()
         
-        with action_col:
-            # Action buttons for selected records
+        with col2:
+            # Show action buttons if records are selected
             if selected_indices:
-                if st.button("✏️ Edit Selected", key="edit_selected"):
-                    if len(selected_indices) == 1:
+                st.write("Selected Actions:")
+                
+                # Edit button (only for single selection)
+                if len(selected_indices) == 1:
+                    if st.button("✏️ Edit", key="edit_selected"):
                         st.session_state.edit_mode = True
                         st.session_state.selected_record = selected_indices[0]
                         st.rerun()
-                    else:
-                        st.warning("Please select only one record to edit")
                 
-                if st.button("🗑️ Delete Selected", key="delete_selected"):
-                    if st.button("Confirm Delete", key="confirm_delete"):
-                        # Delete records in reverse order to maintain indices
+                # Delete button (works for multiple selection)
+                if st.button("🗑️ Delete", key="delete_selected"):
+                    delete_confirmed = st.button("⚠️ Confirm Delete", key="confirm_delete")
+                    if delete_confirmed:
                         for idx in sorted(selected_indices, reverse=True):
                             df = delete_record(idx)
-                        st.success(f"Deleted {len(selected_indices)} record(s) successfully!")
+                        st.success(f"Deleted {len(selected_indices)} record(s)")
+                        time.sleep(1)
                         st.rerun()
 
 # Show success message if set
