@@ -242,12 +242,8 @@ else:  # View/Edit Records
             "Status"
         ]].copy()
         
-        # Add selection column
-        if "selected_index" not in st.session_state:
-            st.session_state.selected_index = None
-        
-        # Display table
-        selected = st.data_editor(
+        # Display table with row selection
+        selected_indices = st.data_editor(
             view_df,
             hide_index=False,
             use_container_width=True,
@@ -261,25 +257,27 @@ else:  # View/Edit Records
                     options=["pending", "complete", "AR/Ap, Stock pending"]
                 ),
             },
-            disabled=view_df.columns.tolist(),  # Make all columns read-only
-            on_change=lambda: setattr(st.session_state, 'selected_index', st.session_state.data_editor_rows_selected[0] if st.session_state.data_editor_rows_selected else None),
+            disabled=view_df.columns.tolist(),
             key="data_editor"
-        )
+        ).index.tolist()
         
         # Show action buttons if row is selected
-        if st.session_state.selected_index is not None:
+        if selected_indices:
+            selected_index = selected_indices[0]  # Get first selected row
             col1, col2 = st.columns(2)
             
             with col1:
-                if st.button("✏️ Edit", use_container_width=True):
+                if st.button("✏️ Edit Record", use_container_width=True):
                     st.session_state.edit_mode = True
-                    st.session_state.selected_record = st.session_state.selected_index
+                    st.session_state.selected_record = selected_index
                     st.rerun()
             
             with col2:
-                if st.button("🗑️ Delete", use_container_width=True):
-                    if st.button("⚠️ Confirm"):
-                        df = delete_record(st.session_state.selected_index)
+                delete = st.button("🗑️ Delete Record", use_container_width=True)
+                if delete:
+                    confirm = st.button("⚠️ Confirm Delete")
+                    if confirm:
+                        df = delete_record(selected_index)
                         st.success("Record deleted successfully!")
                         time.sleep(1)
                         st.rerun()
