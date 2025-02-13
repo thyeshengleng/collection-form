@@ -291,6 +291,22 @@ else:  # View/Edit Records
                             time.sleep(1)
                             st.rerun()
 
+        # Edit form
+        if st.session_state.edit_mode and st.session_state.selected_record is not None:
+            record = df.iloc[st.session_state.selected_record]
+            
+            st.subheader(f"Edit Record: {record['Company Name']}")
+            
+            # User Type
+            user_type = st.radio(
+                "User Type *",
+                ["New User", "Existing User"],
+                index=0 if record["User Type"] == "New User" else 1
+            )
+            
+            # Rest of your edit form code...
+            # (All the fields and save/cancel buttons)
+
 # Show success message if set
 if st.session_state.show_success_message:
     st.success("✅ Record updated successfully!")
