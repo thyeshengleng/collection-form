@@ -36,7 +36,7 @@ export default {
         }
       }
 
-      // Default response - show loading page
+      // Update this URL to your actual Streamlit app URL
       return new Response(`
         <!DOCTYPE html>
         <html>
@@ -45,7 +45,7 @@ export default {
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <script>
-                window.location.href = 'https://share.streamlit.io/lengthyesheng0721/collection-form/main/app.py';
+                window.location.href = 'https://collection-form-lengthyesheng0721.streamlit.app';
             </script>
         </head>
         <body style="font-family: Arial, sans-serif; text-align: center; padding-top: 50px;">
