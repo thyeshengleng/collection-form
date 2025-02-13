@@ -234,52 +234,54 @@ else:  # View/Edit Records
         
         st.subheader("Existing Records")
         
-        # Create a view DataFrame with essential columns
-        view_df = df[[
-            "Company Name", 
-            "User Type", 
-            "Email", 
-            "Status"
-        ]].copy()
+        # Create a view DataFrame with selection column
+        view_df = df.copy()
+        view_df.insert(0, "Select", False)
         
-        # Display interactive table
-        selected_indices = st.data_editor(
+        # Display interactive table with selection
+        edited_df = st.data_editor(
             view_df,
-            hide_index=False,  # Show index to track selection
+            hide_index=True,
             use_container_width=True,
-            num_rows="dynamic",
             column_config={
+                "Select": st.column_config.CheckboxColumn("Select", default=False),
                 "Company Name": st.column_config.TextColumn("Company Name", width="medium"),
                 "User Type": st.column_config.TextColumn("User Type", width="small"),
                 "Email": st.column_config.TextColumn("Email", width="medium"),
-                "Status": st.column_config.TextColumn("Status", width="small"),
+                "Status": st.column_config.SelectboxColumn(
+                    "Status",
+                    width="small",
+                    options=["pending", "complete", "AR/Ap, Stock pending"]
+                ),
             },
+            disabled=["Company Name", "User Type", "Email", "Status"],
             key="data_editor"
-        ).index.tolist()  # Get selected indices directly
-
+        )
+        
+        # Get selected indices
+        selected_indices = edited_df[edited_df["Select"]].index.tolist()
+        
         # Show action buttons
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            if st.button("✏️ Edit Selected", use_container_width=True):
-                if selected_indices:
-                    st.session_state.edit_mode = True
-                    st.session_state.selected_record = selected_indices[0]
-                    st.rerun()
-                else:
-                    st.warning("Please select a record to edit")
-        
-        with col2:
-            if st.button("🗑️ Delete Selected", use_container_width=True):
-                if selected_indices:
+        if selected_indices:
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                if st.button("✏️ Edit Selected", use_container_width=True):
+                    if len(selected_indices) == 1:
+                        st.session_state.edit_mode = True
+                        st.session_state.selected_record = selected_indices[0]
+                        st.rerun()
+                    else:
+                        st.warning("Please select only one record to edit")
+            
+            with col2:
+                if st.button("🗑️ Delete Selected", use_container_width=True):
                     if st.button("⚠️ Confirm Delete"):
                         for idx in sorted(selected_indices, reverse=True):
                             df = delete_record(idx)
                         st.success(f"Deleted {len(selected_indices)} record(s)")
                         time.sleep(1)
                         st.rerun()
-                else:
-                    st.warning("Please select a record to delete")
 
 # Show success message if set
 if st.session_state.show_success_message:
