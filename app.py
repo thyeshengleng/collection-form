@@ -234,21 +234,20 @@ else:  # View/Edit Records
         
         st.subheader("Existing Records")
         
-        # Create a view DataFrame with selection column
-        view_df = df.copy()
-        view_df.insert(0, "Select", False)
+        # Create a view DataFrame
+        view_df = df[[
+            "Company Name", 
+            "User Type", 
+            "Email", 
+            "Status"
+        ]].copy()
         
-        # Display interactive table with selection
-        edited_df = st.data_editor(
+        # Display selectable table
+        selection = st.data_editor(
             view_df,
-            hide_index=True,
+            hide_index=False,
             use_container_width=True,
             column_config={
-                "Select": st.column_config.CheckboxColumn(
-                    "Select",
-                    help="Select to edit or delete",
-                    default=False,
-                ),
                 "Company Name": st.column_config.TextColumn("Company Name", width="medium"),
                 "User Type": st.column_config.TextColumn("User Type", width="small"),
                 "Email": st.column_config.TextColumn("Email", width="medium"),
@@ -258,33 +257,28 @@ else:  # View/Edit Records
                     options=["pending", "complete", "AR/Ap, Stock pending"]
                 ),
             },
-            disabled=["Company Name", "User Type", "Email", "Status"],
+            disabled=view_df.columns.tolist(),  # Make all columns read-only
             key="data_editor"
         )
 
-        # Get selected rows
-        selected_rows = edited_df[edited_df["Select"] == True]
-        
-        # Show action buttons if any rows are selected
-        if not selected_rows.empty:
+        # Get selected index from the selection
+        if selection is not None and len(selection.index) > 0:
+            selected_index = selection.index[0]
+            
+            # Show action buttons
             col1, col2 = st.columns(2)
             
             with col1:
-                if st.button("✏️ Edit Selected", use_container_width=True):
-                    if len(selected_rows) == 1:
-                        idx = selected_rows.index[0]
-                        st.session_state.edit_mode = True
-                        st.session_state.selected_record = idx
-                        st.rerun()
-                    else:
-                        st.warning("Please select only one record to edit")
+                if st.button("✏️ Edit", use_container_width=True):
+                    st.session_state.edit_mode = True
+                    st.session_state.selected_record = selected_index
+                    st.rerun()
             
             with col2:
-                if st.button("🗑️ Delete Selected", use_container_width=True):
-                    if st.button("⚠️ Confirm Delete"):
-                        for idx in selected_rows.index:
-                            df = delete_record(idx)
-                        st.success(f"Deleted {len(selected_rows)} record(s)")
+                if st.button("🗑️ Delete", use_container_width=True):
+                    if st.button("⚠️ Confirm"):
+                        df = delete_record(selected_index)
+                        st.success("Record deleted successfully!")
                         time.sleep(1)
                         st.rerun()
 
