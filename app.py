@@ -243,7 +243,7 @@ else:  # View/Edit Records
         ]].copy()
         
         # Display interactive table
-        selected_rows = st.data_editor(
+        selected_row = st.data_editor(
             view_df,
             hide_index=True,
             use_container_width=True,
@@ -257,26 +257,33 @@ else:  # View/Edit Records
             key="data_editor"
         )
 
-        # Get selected row index
-        if len(selected_rows) > 0:
-            selected_index = view_df.index[view_df['Company Name'] == selected_rows['Company Name']].tolist()[0]
-            
-            # Show action buttons for selected row
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                if st.button("✏️ Edit Selected", use_container_width=True):
+        # Show action buttons
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("✏️ Edit Selected", use_container_width=True):
+                # Find the selected row in the original DataFrame
+                selected_company = selected_row.get("Company Name")
+                if selected_company:
+                    selected_index = df[df["Company Name"] == selected_company].index[0]
                     st.session_state.edit_mode = True
                     st.session_state.selected_record = selected_index
                     st.rerun()
-            
-            with col2:
-                if st.button("🗑️ Delete Selected", use_container_width=True):
+                else:
+                    st.warning("Please select a record to edit")
+        
+        with col2:
+            if st.button("🗑️ Delete Selected", use_container_width=True):
+                selected_company = selected_row.get("Company Name")
+                if selected_company:
                     if st.button("⚠️ Confirm Delete"):
+                        selected_index = df[df["Company Name"] == selected_company].index[0]
                         df = delete_record(selected_index)
                         st.success("Record deleted successfully!")
                         time.sleep(1)
                         st.rerun()
+                else:
+                    st.warning("Please select a record to delete")
 
 # Show success message if set
 if st.session_state.show_success_message:
