@@ -234,44 +234,47 @@ else:  # View/Edit Records
         
         st.subheader("Existing Records")
         
-        # Display the main table with selection
-        selected_indices = []
+        # Create a view DataFrame with essential columns
+        view_df = df[[
+            "Company Name", 
+            "User Type", 
+            "Email", 
+            "Status"
+        ]].copy()
         
-        # Create two columns - one for data, one for actions
-        col1, col2 = st.columns([4, 1])
-        
-        with col1:
-            # Display records with checkboxes
-            for idx, row in df.iterrows():
-                col_select, col_data = st.columns([1, 6])
-                with col_select:
-                    if st.checkbox("", key=f"select_{idx}"):
-                        selected_indices.append(idx)
-                with col_data:
-                    st.write(f"**{row['Company Name']}**")
-                    st.write(f"Email: {row['Email']}")
-                    st.write(f"Status: {row['Status']}")
-                st.divider()
-        
-        with col2:
-            # Show action buttons if records are selected
-            if selected_indices:
-                st.write("Selected Actions:")
-                
-                # Edit button (only for single selection)
-                if len(selected_indices) == 1:
-                    if st.button("✏️ Edit", key="edit_selected"):
-                        st.session_state.edit_mode = True
-                        st.session_state.selected_record = selected_indices[0]
-                        st.rerun()
-                
-                # Delete button (works for multiple selection)
-                if st.button("🗑️ Delete", key="delete_selected"):
-                    delete_confirmed = st.button("⚠️ Confirm Delete", key="confirm_delete")
-                    if delete_confirmed:
-                        for idx in sorted(selected_indices, reverse=True):
-                            df = delete_record(idx)
-                        st.success(f"Deleted {len(selected_indices)} record(s)")
+        # Display interactive table
+        selected_rows = st.data_editor(
+            view_df,
+            hide_index=True,
+            use_container_width=True,
+            num_rows="dynamic",
+            column_config={
+                "Company Name": st.column_config.TextColumn("Company Name", width="medium"),
+                "User Type": st.column_config.TextColumn("User Type", width="small"),
+                "Email": st.column_config.TextColumn("Email", width="medium"),
+                "Status": st.column_config.TextColumn("Status", width="small"),
+            },
+            key="data_editor"
+        )
+
+        # Get selected row index
+        if len(selected_rows) > 0:
+            selected_index = view_df.index[view_df['Company Name'] == selected_rows['Company Name']].tolist()[0]
+            
+            # Show action buttons for selected row
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                if st.button("✏️ Edit Selected", use_container_width=True):
+                    st.session_state.edit_mode = True
+                    st.session_state.selected_record = selected_index
+                    st.rerun()
+            
+            with col2:
+                if st.button("🗑️ Delete Selected", use_container_width=True):
+                    if st.button("⚠️ Confirm Delete"):
+                        df = delete_record(selected_index)
+                        st.success("Record deleted successfully!")
                         time.sleep(1)
                         st.rerun()
 
