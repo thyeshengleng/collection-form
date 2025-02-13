@@ -20,7 +20,7 @@ if 'show_success_message' not in st.session_state:
     st.session_state.show_success_message = False
 
 # Your Cloudflare Worker URL
-WORKER_URL = "https://collection-form.lengthyesheng0721.workers.dev"  # Make sure this matches exactly
+WORKER_URL = "https://collection-form.lengthyesheng0721.workers.dev"
 
 # Function to load records from Cloudflare KV
 def load_records():
