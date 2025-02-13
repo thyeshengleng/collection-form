@@ -244,7 +244,11 @@ else:  # View/Edit Records
             hide_index=True,
             use_container_width=True,
             column_config={
-                "Select": st.column_config.CheckboxColumn("Select", default=False),
+                "Select": st.column_config.CheckboxColumn(
+                    "Select",
+                    help="Select to edit or delete",
+                    default=False,
+                ),
                 "Company Name": st.column_config.TextColumn("Company Name", width="medium"),
                 "User Type": st.column_config.TextColumn("User Type", width="small"),
                 "Email": st.column_config.TextColumn("Email", width="medium"),
@@ -257,19 +261,20 @@ else:  # View/Edit Records
             disabled=["Company Name", "User Type", "Email", "Status"],
             key="data_editor"
         )
+
+        # Get selected rows
+        selected_rows = edited_df[edited_df["Select"] == True]
         
-        # Get selected indices
-        selected_indices = edited_df[edited_df["Select"]].index.tolist()
-        
-        # Show action buttons
-        if selected_indices:
+        # Show action buttons if any rows are selected
+        if not selected_rows.empty:
             col1, col2 = st.columns(2)
             
             with col1:
                 if st.button("✏️ Edit Selected", use_container_width=True):
-                    if len(selected_indices) == 1:
+                    if len(selected_rows) == 1:
+                        idx = selected_rows.index[0]
                         st.session_state.edit_mode = True
-                        st.session_state.selected_record = selected_indices[0]
+                        st.session_state.selected_record = idx
                         st.rerun()
                     else:
                         st.warning("Please select only one record to edit")
@@ -277,9 +282,9 @@ else:  # View/Edit Records
             with col2:
                 if st.button("🗑️ Delete Selected", use_container_width=True):
                     if st.button("⚠️ Confirm Delete"):
-                        for idx in sorted(selected_indices, reverse=True):
+                        for idx in selected_rows.index:
                             df = delete_record(idx)
-                        st.success(f"Deleted {len(selected_indices)} record(s)")
+                        st.success(f"Deleted {len(selected_rows)} record(s)")
                         time.sleep(1)
                         st.rerun()
 
