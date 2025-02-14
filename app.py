@@ -5,7 +5,22 @@ import os
 import time
 import requests
 
-st.set_page_config(page_title="Collection Action List", layout="centered")
+# Hide Streamlit menu and footer
+st.set_page_config(
+    page_title="Collection Action List",
+    layout="centered",
+    initial_sidebar_state="collapsed"
+)
+
+# Hide menu button and footer
+hide_menu_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        </style>
+        """
+st.markdown(hide_menu_style, unsafe_allow_html=True)
 
 # Initialize session state
 if 'form_submitted' not in st.session_state:
