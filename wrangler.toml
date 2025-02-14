@@ -9,7 +9,7 @@ exclude = []
 
 [[kv_namespaces]]
 binding = "FORM_DATA"
-id = "NEW_ID_FROM_CREATE_COMMAND"
+id = "a60b1d021428427cbb6561155cdb8ad2"
 
 # Remove build command since we're using Streamlit Cloud
 # [build]
