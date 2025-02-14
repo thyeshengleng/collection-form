@@ -528,28 +528,42 @@ elif page == "View Database":
     st.subheader("Database Connection")
     
     with st.form("db_connection"):
+        # Server selection
         server_options = [
             "DESKTOP-RMNV9QV\\A2006",
             "localhost\\A2006",
             "(local)\\A2006",
-            ".\\A2006"
+            ".\\A2006",
+            "localhost",
+            "(local)",
+            "."
         ]
         
         server_name = st.selectbox(
             "Server Name",
             options=server_options,
-            help="Select or type your server name"
+            index=0,
+            help="Select your SQL Server instance"
         )
         
+        # Database name input
         database_name = st.text_input(
             "Database Name", 
             value="AED_AssignmentOne",
-            help="Example: AED_AssignmentOne"
+            help="Enter your database name"
         )
         
-        st.info("Make sure SQL Server is running and allows remote connections")
+        # Add connection info
+        st.info("""
+        Before connecting, please check:
+        1. SQL Server is running
+        2. SQL Server Browser is running
+        3. TCP/IP is enabled
+        4. Named Pipes is enabled
+        """)
         
-        if st.form_submit_button("Connect"):
+        # Connect button
+        if st.form_submit_button("Connect", use_container_width=True):
             st.session_state.view_database = True
             view_sql_data(server_name, database_name)
 
@@ -559,37 +573,42 @@ st.write("")
 
 # Database viewer function
 def view_sql_data(server, database):
+    conn = None
     try:
+        # Print available drivers
+        st.write("Available drivers:", [x for x in pyodbc.drivers() if 'SQL Server' in x])
+        
         # Try different connection strings
         connection_strings = [
-            # Option 1: Basic connection
+            # Option 1: Local instance
             f'DRIVER={{SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;',
             
-            # Option 2: With instance name
-            f'DRIVER={{SQL Server}};SERVER=localhost\\{server.split("\\")[-1]};DATABASE={database};Trusted_Connection=yes;',
+            # Option 2: Named instance
+            f'DRIVER={{SQL Server Native Client 11.0}};SERVER={server};DATABASE={database};Trusted_Connection=yes;',
             
-            # Option 3: With full settings
-            f'DRIVER={{SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;TrustServerCertificate=yes;Encrypt=no;',
-            
-            # Option 4: Using TCP
-            f'DRIVER={{SQL Server}};SERVER=tcp:{server};DATABASE={database};Trusted_Connection=yes;'
+            # Option 3: TCP/IP
+            f'DRIVER={{SQL Server}};SERVER=127.0.0.1,1433;DATABASE={database};Trusted_Connection=yes;',
         ]
         
-        conn = None
         error_messages = []
         
         # Try each connection string
         for conn_str in connection_strings:
             try:
-                st.write(f"Trying connection: {conn_str}")  # Debug info
-                conn = pyodbc.connect(conn_str, timeout=10)
+                st.info(f"Attempting connection with: {conn_str}")
+                conn = pyodbc.connect(conn_str, timeout=30)
+                st.success("Connection successful!")
                 break
             except Exception as e:
                 error_messages.append(str(e))
                 continue
         
         if not conn:
-            st.error("Could not connect to database. Errors:")
+            st.error("Could not connect to database. Please check:")
+            st.error("1. SQL Server is running")
+            st.error("2. Instance name is correct")
+            st.error("3. Database exists")
+            st.error("Detailed errors:")
             for msg in error_messages:
                 st.error(msg)
             return False
@@ -598,6 +617,10 @@ def view_sql_data(server, database):
         cursor = conn.cursor()
         tables = cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'").fetchall()
         
+        if not tables:
+            st.warning("No tables found in database")
+            return False
+            
         # Let user select table
         table_names = [table[0] for table in tables]
         selected_table = st.selectbox("Select Table", table_names)
@@ -619,9 +642,12 @@ def view_sql_data(server, database):
                     key='download-csv'
                 )
         
-        conn.close()
         return True
         
     except Exception as e:
         st.error(f"Database error: {str(e)}")
         return False
+        
+    finally:
+        if conn:
+            conn.close()
