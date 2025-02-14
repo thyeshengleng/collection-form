@@ -3,10 +3,69 @@ import pandas as pd
 from datetime import datetime
 import time
 import requests
+import pyodbc
 from app.utils.database import load_records, save_records, create_record, update_record, delete_record
 from app.components.form import render_create_form
 from app.components.table import render_records_table
 from app.components.edit_form import render_edit_form
+
+def render_db_form():
+    st.subheader("Database Connection")
+    
+    # Initialize session state for database connection
+    if 'server_name' not in st.session_state:
+        st.session_state.server_name = ""
+    if 'database_name' not in st.session_state:
+        st.session_state.database_name = ""
+    if 'is_connected' not in st.session_state:
+        st.session_state.is_connected = False
+    
+    # Server name input
+    server_name = st.text_input(
+        "Server Name",
+        value=st.session_state.server_name,
+        placeholder="Enter server name (e.g., DESKTOP-ABC\\SQLEXPRESS)",
+        help="Your SQL Server instance name"
+    )
+    
+    # Database name input
+    database_name = st.text_input(
+        "Database Name",
+        value=st.session_state.database_name,
+        placeholder="Enter database name",
+        help="The name of your database"
+    )
+    
+    # Connect button
+    if st.button("Connect to Database", use_container_width=True):
+        try:
+            # Clean up server name to handle backslashes
+            server = server_name.replace('\\', '\\\\')
+            
+            conn_str = (
+                f'DRIVER={{ODBC Driver 17 for SQL Server}};'
+                f'SERVER={server};'
+                f'DATABASE={database_name};'
+                'Trusted_Connection=yes;'
+                'TrustServerCertificate=yes;'
+            )
+            
+            # Try to connect
+            conn = pyodbc.connect(conn_str)
+            conn.close()
+            
+            # Save connection info to session state
+            st.session_state.server_name = server_name
+            st.session_state.database_name = database_name
+            st.session_state.is_connected = True
+            
+            st.success("✅ Connected to database successfully!")
+            time.sleep(1)
+            st.rerun()
+            
+        except Exception as e:
+            st.error(f"❌ Connection failed: {str(e)}")
+            st.session_state.is_connected = False
 
 def main():
     # Initialize app configuration
@@ -42,19 +101,29 @@ def main():
     # CRUD Mode Selection
     crud_mode = st.radio(
         "Select Operation",
-        ["Create New Record", "View/Edit Records"],
+        ["Database Connection", "Create New Record", "View/Edit Records"],
         horizontal=True
     )
 
-    if crud_mode == "Create New Record":
-        render_create_form()
-    else:
-        df, edited_df = render_records_table()
-        if df is not None and edited_df is not None:
-            # Handle edit/delete operations
-            selected_rows = edited_df[edited_df["Select"] == True]
-            if not selected_rows.empty:
-                handle_selected_rows(selected_rows, df)
+    if crud_mode == "Database Connection":
+        render_db_form()
+    elif crud_mode == "Create New Record":
+        if st.session_state.is_connected:
+            render_create_form()
+        else:
+            st.warning("Please connect to database first")
+            render_db_form()
+    else:  # View/Edit Records
+        if st.session_state.is_connected:
+            df, edited_df = render_records_table()
+            if df is not None and edited_df is not None:
+                # Handle edit/delete operations
+                selected_rows = edited_df[edited_df["Select"] == True]
+                if not selected_rows.empty:
+                    handle_selected_rows(selected_rows, df)
+        else:
+            st.warning("Please connect to database first")
+            render_db_form()
 
 def handle_selected_rows(selected_rows, df):
     if len(selected_rows) == 1:
