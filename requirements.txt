@@ -1,4 +1,5 @@
 streamlit==1.32.0
+<<<<<<< HEAD
 pandas==2.2.0
 numpy>=1.26.0  # Compatible with Python 3.12
 requests==2.31.0
@@ -6,3 +7,11 @@ python-dotenv==1.0.0
 PyPDF2==3.0.1
 reportlab==4.1.0
 pyodbc==4.0.39 
+=======
+pandas>=2.1.0
+numpy>=1.26.0
+requests==2.31.0
+python-dotenv==1.0.0
+PyPDF2==3.0.1
+reportlab==4.1.0
+>>>>>>> parent of b3150cd (Revert "initial commit")

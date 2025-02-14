@@ -12,4 +12,4 @@ PLUGIN_OPTIONS = [
 
 REPORT_OPTIONS = ["SO", "DO", "INV", "PO", "PICKING LIST"]
 
-STATUS_OPTIONS = ["pending", "complete", "AR/Ap, Stock pending"] 
+STATUS_OPTIONS = ["pending", "complete", "AR/Ap, Stock pending"]
