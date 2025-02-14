@@ -49,17 +49,26 @@ WORKER_URL = "https://collection-form.southlinks.workers.dev"
 # Database connection function
 def connect_to_db(server, database):
     try:
-        conn = pyodbc.connect(
-            'DRIVER={SQL Server};'
+        # Clean up server name to handle backslashes
+        server = server.replace('\\', '\\\\')
+        
+        conn_str = (
+            f'DRIVER={{ODBC Driver 17 for SQL Server}};'
             f'SERVER={server};'
             f'DATABASE={database};'
             'Trusted_Connection=yes;'
             'TrustServerCertificate=yes;'
-            'Encrypt=no;'
         )
+        
+        # Print connection string for debugging
+        print(f"Connection string: {conn_str}")
+        
+        conn = pyodbc.connect(conn_str)
         return conn
     except Exception as e:
         st.error(f"Database connection error: {str(e)}")
+        # Print available drivers for debugging
+        print("Available drivers:", [x for x in pyodbc.drivers()])
         return None
 
 # Function to load records from SQL
@@ -237,9 +246,25 @@ crud_mode = st.radio(
 if not st.session_state.db_connected:
     st.title("Database Connection")
     
+    # Show available drivers
+    st.write("Available SQL Server Drivers:")
+    st.write([x for x in pyodbc.drivers() if 'SQL Server' in x])
+    
     with st.form("db_connection"):
-        server_name = st.text_input("Server Name", value="DESKTOP-RMNV9QV\A2006")
-        database_name = st.text_input("Database Name", value="AED_AssignmentOne")
+        server_name = st.text_input(
+            "Server Name", 
+            value="DESKTOP-RMNV9QV\\A2006",
+            help="Example: DESKTOP-RMNV9QV\\A2006 or localhost\\SQLEXPRESS"
+        )
+        database_name = st.text_input(
+            "Database Name", 
+            value="AED_AssignmentOne",
+            help="Example: AED_AssignmentOne"
+        )
+        
+        # Add driver selection
+        drivers = [x for x in pyodbc.drivers() if 'SQL Server' in x]
+        selected_driver = st.selectbox("Select SQL Server Driver", drivers)
         
         col1, col2 = st.columns(2)
         with col1:
