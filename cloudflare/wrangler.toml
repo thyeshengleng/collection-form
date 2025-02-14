@@ -1,0 +1,19 @@
+name = "collection-form"
+main = "src/worker.js"  # This is the entry point
+compatibility_date = "2024-01-01"
+
+[site]
+bucket = "./public"
+include = ["public/**/*"]
+exclude = []
+
+[[kv_namespaces]]
+binding = "FORM_DATA"
+id = "9992ed9592824f479199b430befc6162"
+
+[observability]
+[observability.logs]
+enabled = true
+
+[dev]
+port = 8787 
