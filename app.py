@@ -186,6 +186,7 @@ if crud_mode == "Create New Record":
 
 else:  # View/Edit Records
     # Load and display existing records
+    from utils.database import load_records
     df = load_records()
     
     if not df.empty:
