@@ -12,7 +12,7 @@ from app.components.edit_form import render_edit_form
 def render_db_form():
     st.subheader("Database Connection")
     
-    # Initialize session state for database connection
+    # Initialize session state
     if 'server_name' not in st.session_state:
         st.session_state.server_name = ""
     if 'database_name' not in st.session_state:
@@ -20,15 +20,29 @@ def render_db_form():
     
     # Help text and examples
     st.markdown("### Server Name")
-    st.caption("Common formats:")
-    st.code("localhost\\SQLEXPRESS")
-    st.code("(local)\\SQLEXPRESS")
-    st.code("DESKTOP-ABC\\SQLEXPRESS")
+    st.caption("Try these server names:")
+    st.code(".")  # Local default instance
+    st.code(".\\SQLEXPRESS")  # Local SQL Express
+    st.code("localhost")  # Local default instance
+    st.code("localhost\\SQLEXPRESS")  # Local SQL Express
+    st.code("(local)")  # Local default instance
+    st.code("(local)\\SQLEXPRESS")  # Local SQL Express
     
-    server_name = st.text_input(
-        "Enter Server Name",
-        value=st.session_state.server_name,
-        help="Your SQL Server instance name"
+    # Add a server name selector
+    server_options = [
+        ".",
+        ".\\SQLEXPRESS",
+        "localhost",
+        "localhost\\SQLEXPRESS",
+        "(local)",
+        "(local)\\SQLEXPRESS"
+    ]
+    server_name = st.selectbox(
+        "Select or Enter Server Name",
+        options=server_options,
+        index=None,
+        placeholder="Choose a server name or type your own",
+        value=st.session_state.server_name
     )
     
     # Database name input
@@ -36,6 +50,7 @@ def render_db_form():
     database_name = st.text_input(
         "Enter Database Name",
         value=st.session_state.database_name,
+        placeholder="e.g., AED_AssignmentOne",
         help="The name of your database"
     )
     
