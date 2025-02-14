@@ -1,9 +1,14 @@
 import streamlit as st
 import pandas as pd
+import pyodbc
 from datetime import datetime
 import os
 import time
 import requests
+
+# Initialize session state for database connection
+if 'db_connected' not in st.session_state:
+    st.session_state.db_connected = False
 
 # Hide Streamlit menu and footer
 st.set_page_config(
@@ -37,49 +42,181 @@ if 'show_success_message' not in st.session_state:
 # Your Cloudflare Worker URL
 WORKER_URL = "https://collection-form.southlinks.workers.dev"
 
-# Function to load records from Cloudflare KV
+# Database connection function
+def connect_to_db():
+    try:
+        conn = pyodbc.connect(
+            'DRIVER={SQL Server};'
+            'SERVER=your_server_name;'
+            'DATABASE=your_database;'
+            'UID=your_username;'          # Replace with your username
+            'PWD=your_password;'          # Replace with your password
+        )
+        return conn
+    except Exception as e:
+        st.error(f"Database connection error: {str(e)}")
+        return None
+
+# Function to load records from SQL
 def load_records():
     try:
-        response = requests.get(f"{WORKER_URL}/api/form")
-        if response.status_code == 200:
-            data = response.json()
-            return pd.DataFrame(data) if data else pd.DataFrame()
-    except:
+        conn = connect_to_db()
+        if conn:
+            query = "SELECT * FROM CollectionActionList"  # Replace with your table name
+            df = pd.read_sql(query, conn)
+            conn.close()
+            return df
+        return pd.DataFrame()
+    except Exception as e:
+        st.error(f"Error loading records: {str(e)}")
         return pd.DataFrame()
 
-# Function to save records to Cloudflare KV
-def save_records(df):
+# Function to save record to SQL
+def save_record(form_data):
     try:
-        records = df.to_dict('records')
-        requests.post(f"{WORKER_URL}/api/form", json=records)
-    except:
-        st.error("Failed to save data")
+        conn = connect_to_db()
+        if conn:
+            cursor = conn.cursor()
+            
+            # Insert query
+            query = """
+            INSERT INTO CollectionActionList (
+                UserType, CompanyName, Email, Address, BusinessInfo,
+                TaxID, EInvoiceStartDate, PlugInModule, VPNInfo,
+                ModuleLicense, ReportTemplate, MigrationMasterData,
+                MigrationOutstandingBalance, Status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+            
+            # Convert form_data to tuple for SQL insert
+            values = (
+                form_data['User Type'],
+                form_data['Company Name'],
+                form_data['Email'],
+                form_data['Address'],
+                form_data['Business Info'],
+                form_data['Tax ID'],
+                form_data['E-Invoice Start Date'],
+                form_data['Plug In Module'],
+                form_data['VPN Info'],
+                form_data['Module & User License'],
+                form_data['Report Design Template'],
+                form_data['Migration Master Data'],
+                form_data['Migration Outstanding Balance'],
+                form_data['Status']
+            )
+            
+            cursor.execute(query, values)
+            conn.commit()
+            conn.close()
+            return True
+    except Exception as e:
+        st.error(f"Error saving record: {str(e)}")
+        return False
 
-# CRUD Operations
-def create_record(form_data):
-    df = load_records()
-    # Convert all values to string before creating new record
-    form_data = {k: str(v) for k, v in form_data.items()}
-    new_df = pd.DataFrame([form_data])
-    df = pd.concat([df, new_df], ignore_index=True)
-    save_records(df)
-    return df
+# Function to update record in SQL
+def update_record(record_id, form_data):
+    try:
+        conn = connect_to_db()
+        if conn:
+            cursor = conn.cursor()
+            
+            # Update query
+            query = """
+            UPDATE CollectionActionList
+            SET UserType = ?,
+                CompanyName = ?,
+                Email = ?,
+                Address = ?,
+                BusinessInfo = ?,
+                TaxID = ?,
+                EInvoiceStartDate = ?,
+                PlugInModule = ?,
+                VPNInfo = ?,
+                ModuleLicense = ?,
+                ReportTemplate = ?,
+                MigrationMasterData = ?,
+                MigrationOutstandingBalance = ?,
+                Status = ?
+            WHERE ID = ?
+            """
+            
+            values = (
+                form_data['User Type'],
+                form_data['Company Name'],
+                form_data['Email'],
+                form_data['Address'],
+                form_data['Business Info'],
+                form_data['Tax ID'],
+                form_data['E-Invoice Start Date'],
+                form_data['Plug In Module'],
+                form_data['VPN Info'],
+                form_data['Module & User License'],
+                form_data['Report Design Template'],
+                form_data['Migration Master Data'],
+                form_data['Migration Outstanding Balance'],
+                form_data['Status'],
+                record_id
+            )
+            
+            cursor.execute(query, values)
+            conn.commit()
+            conn.close()
+            return True
+    except Exception as e:
+        st.error(f"Error updating record: {str(e)}")
+        return False
 
-def update_record(index, form_data):
-    df = load_records()
-    # Convert all values to string before updating
-    form_data = {k: str(v) for k, v in form_data.items()}
-    for key, value in form_data.items():
-        df.at[index, key] = value
-    save_records(df)
-    return df
+# Function to delete record from SQL
+def delete_record(record_id):
+    try:
+        conn = connect_to_db()
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM CollectionActionList WHERE ID = ?", record_id)
+            conn.commit()
+            conn.close()
+            return True
+    except Exception as e:
+        st.error(f"Error deleting record: {str(e)}")
+        return False
 
-def delete_record(index):
-    df = load_records()
-    df = df.drop(index)
-    df = df.reset_index(drop=True)
-    save_records(df)
-    return df
+# Create SQL table if it doesn't exist
+def create_table():
+    try:
+        conn = connect_to_db()
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='CollectionActionList' AND xtype='U')
+                CREATE TABLE CollectionActionList (
+                    ID INT IDENTITY(1,1) PRIMARY KEY,
+                    UserType NVARCHAR(50),
+                    CompanyName NVARCHAR(200),
+                    Email NVARCHAR(200),
+                    Address NVARCHAR(MAX),
+                    BusinessInfo NVARCHAR(MAX),
+                    TaxID NVARCHAR(100),
+                    EInvoiceStartDate DATE,
+                    PlugInModule NVARCHAR(MAX),
+                    VPNInfo NVARCHAR(MAX),
+                    ModuleLicense NVARCHAR(MAX),
+                    ReportTemplate NVARCHAR(MAX),
+                    MigrationMasterData NVARCHAR(MAX),
+                    MigrationOutstandingBalance NVARCHAR(MAX),
+                    Status NVARCHAR(50),
+                    CreatedDate DATETIME DEFAULT GETDATE()
+                )
+            """)
+            conn.commit()
+            conn.close()
+            return True
+    except Exception as e:
+        st.error(f"Error creating table: {str(e)}")
+        return False
+
+# Create table when app starts
+create_table()
 
 # Main title
 st.title("Collection Action List")
@@ -227,9 +364,8 @@ if crud_mode == "Create New Record":
                 "Status": status
             }
             
-            df = create_record(form_data)
+            save_record(form_data)
             st.success("✅ Record saved successfully!")
-            st.write(df.tail(1))
         else:
             st.error("Please fill in all required fields correctly")
 
@@ -312,7 +448,7 @@ else:  # View/Edit Records
                     with col3:
                         if st.button("⚠️ Confirm", use_container_width=True):
                             for idx in selected_rows.index:
-                                df = delete_record(idx)
+                                delete_record(idx)
                             st.success(f"Deleted {len(selected_rows)} record(s)")
                             st.session_state.delete_confirmation = False
                             time.sleep(1)
@@ -410,7 +546,7 @@ else:  # View/Edit Records
                         "Migration Outstanding Balance": migration_outstanding,
                         "Status": status
                     }
-                    df = update_record(st.session_state.selected_record, updated_data)
+                    update_record(st.session_state.selected_record, updated_data)
                     st.success(f"✅ Record for {company_name} updated successfully!")
                     time.sleep(1)
                     st.session_state.edit_mode = False
