@@ -6,9 +6,10 @@ export default {
       // Handle form data storage using KV
       if (url.pathname === '/api/form') {
         const corsHeaders = {
-          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Origin': 'https://share.streamlit.io',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type',
+          'Access-Control-Allow-Credentials': 'true'
         };
 
         // Handle OPTIONS request
@@ -41,26 +42,8 @@ export default {
         }
       }
 
-      // Return the HTML page for other routes
-      return new Response(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Collection Action List</title>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <script>
-                window.location.href = 'https://share.streamlit.io/thyeshengleng/collection-form/main/app.py';
-            </script>
-        </head>
-        <body>
-            <h1>Collection Action List</h1>
-            <p>Loading application...</p>
-        </body>
-        </html>
-      `, {
-        headers: { 'Content-Type': 'text/html' }
-      });
+      // Redirect to Streamlit
+      return Response.redirect('https://share.streamlit.io/thyeshengleng/collection-form/main/app.py', 301);
 
     } catch (e) {
       return new Response(`Error: ${e.message}`, { 
