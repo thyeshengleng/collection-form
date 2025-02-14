@@ -37,7 +37,6 @@ if 'show_success_message' not in st.session_state:
 # Your Cloudflare Worker URL
 WORKER_URL = "https://collection-form.southlinks.workers.dev"
 
-<<<<<<< HEAD
 # Database connection function
 def connect_to_db(server, database):
     try:
