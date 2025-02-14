@@ -3,7 +3,8 @@ import pandas as pd
 from datetime import datetime
 import time
 import requests
-import pyodbc
+from utils.database import load_records, save_records, create_record, update_record, delete_record
+from config.settings import WORKER_URL, PLUGIN_OPTIONS, REPORT_OPTIONS, STATUS_OPTIONS
 
 # Hide Streamlit menu and footer
 st.set_page_config(
@@ -31,71 +32,9 @@ if 'selected_record' not in st.session_state:
     st.session_state.selected_record = None
 if 'show_success_message' not in st.session_state:
     st.session_state.show_success_message = False
-if 'server_name' not in st.session_state:
-    st.session_state.server_name = ""
-if 'database_name' not in st.session_state:
-    st.session_state.database_name = ""
-if 'is_connected' not in st.session_state:
-    st.session_state.is_connected = False
 
 # Main title
 st.title("Collection Action List")
-
-# Database Connection Form
-with st.sidebar:
-    st.header("Database Connection")
-    
-    # Server name input
-    server_name = st.text_input(
-        "Server Name",
-        value=st.session_state.server_name,
-        placeholder="Enter server name"
-    )
-    
-    # Database name input
-    database_name = st.text_input(
-        "Database Name",
-        value=st.session_state.database_name,
-        placeholder="Enter database name"
-    )
-    
-    # Connect button
-    if st.button("Connect to Database"):
-        try:
-            # Clean up server name to handle backslashes
-            server = server_name.replace('\\', '\\\\')
-            
-            conn_str = (
-                f'DRIVER={{ODBC Driver 17 for SQL Server}};'
-                f'SERVER={server};'
-                f'DATABASE={database_name};'
-                'Trusted_Connection=yes;'
-                'TrustServerCertificate=yes;'
-            )
-            
-            # Try to connect
-            conn = pyodbc.connect(conn_str)
-            conn.close()
-            
-            # Save connection info to session state
-            st.session_state.server_name = server_name
-            st.session_state.database_name = database_name
-            st.session_state.is_connected = True
-            
-            st.success("✅ Connected to database successfully!")
-            
-        except Exception as e:
-            st.error(f"❌ Connection failed: {str(e)}")
-            st.session_state.is_connected = False
-    
-    # Show connection status
-    if st.session_state.is_connected:
-        st.info(f"Connected to: {st.session_state.database_name}")
-        if st.button("Disconnect"):
-            st.session_state.is_connected = False
-            st.session_state.server_name = ""
-            st.session_state.database_name = ""
-            st.rerun()
 
 # CRUD Mode Selection
 crud_mode = st.radio(
