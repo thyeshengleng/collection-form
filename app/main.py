@@ -86,10 +86,9 @@ def render_db_form():
             try:
                 server = server_name.replace('\\', '\\\\')
                 conn_str = (
-                    f'DRIVER={{ODBC Driver 17 for SQL Server}};'
+                    f'DRIVER={{SQL Server}};'  # Use SQL Server driver for 2006
                     f'SERVER={server};'
                     'Trusted_Connection=yes;'
-                    'TrustServerCertificate=yes;'
                 )
                 conn = pyodbc.connect(conn_str)
                 conn.close()
@@ -101,15 +100,12 @@ def render_db_form():
     with col2:
         if st.button("👁️ View Database Data", use_container_width=True):
             try:
-                # Clean up server name to handle backslashes
                 server = server_name.replace('\\', '\\\\')
-                
                 conn_str = (
-                    f'DRIVER={{ODBC Driver 17 for SQL Server}};'
+                    f'DRIVER={{SQL Server}};'  # Use SQL Server driver for 2006
                     f'SERVER={server};'
                     f'DATABASE={database_name};'
                     'Trusted_Connection=yes;'
-                    'TrustServerCertificate=yes;'
                 )
                 
                 # Try to connect and fetch data
