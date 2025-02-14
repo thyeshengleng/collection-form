@@ -1,6 +1,6 @@
 import streamlit as st
-from utils.database import load_records, delete_record
-from config.settings import STATUS_OPTIONS
+from app.utils.database import load_records, delete_record
+from app.config.settings import STATUS_OPTIONS
 
 def render_records_table():
     df = load_records()

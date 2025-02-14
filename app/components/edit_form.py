@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import datetime
-from utils.database import update_record
-from config.settings import PLUGIN_OPTIONS, REPORT_OPTIONS, STATUS_OPTIONS
+from app.utils.database import update_record
+from app.config.settings import PLUGIN_OPTIONS, REPORT_OPTIONS, STATUS_OPTIONS
 
 def render_edit_form(record, index):
     st.subheader(f"Edit Record: {record['Company Name']}")

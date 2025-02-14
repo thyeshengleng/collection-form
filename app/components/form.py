@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import datetime
-from config.settings import PLUGIN_OPTIONS, REPORT_OPTIONS, STATUS_OPTIONS
-from utils.database import create_record
+from app.config.settings import PLUGIN_OPTIONS, REPORT_OPTIONS, STATUS_OPTIONS
+from app.utils.database import create_record
 
 def render_create_form():
     st.session_state.edit_mode = False
