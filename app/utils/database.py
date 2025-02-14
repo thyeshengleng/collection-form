@@ -1,6 +1,6 @@
 import pandas as pd
 import requests
-from config.settings import WORKER_URL
+from app.config.settings import WORKER_URL
 
 def load_records():
     try:
