@@ -3,8 +3,7 @@ import pandas as pd
 from datetime import datetime
 import time
 import requests
-from utils.database import load_records, save_records, create_record, update_record, delete_record
-from config.settings import WORKER_URL, PLUGIN_OPTIONS, REPORT_OPTIONS, STATUS_OPTIONS
+import streamlit as st
 
 # Hide Streamlit menu and footer
 st.set_page_config(
