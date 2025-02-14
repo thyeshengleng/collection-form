@@ -528,16 +528,26 @@ elif page == "View Database":
     st.subheader("Database Connection")
     
     with st.form("db_connection"):
-        server_name = st.text_input(
-            "Server Name", 
-            value="DESKTOP-RMNV9QV\\A2006",
-            help="Example: DESKTOP-RMNV9QV\\A2006"
+        server_options = [
+            "DESKTOP-RMNV9QV\\A2006",
+            "localhost\\A2006",
+            "(local)\\A2006",
+            ".\\A2006"
+        ]
+        
+        server_name = st.selectbox(
+            "Server Name",
+            options=server_options,
+            help="Select or type your server name"
         )
+        
         database_name = st.text_input(
             "Database Name", 
             value="AED_AssignmentOne",
             help="Example: AED_AssignmentOne"
         )
+        
+        st.info("Make sure SQL Server is running and allows remote connections")
         
         if st.form_submit_button("Connect"):
             st.session_state.view_database = True
@@ -546,3 +556,72 @@ elif page == "View Database":
 # Add some padding at the bottom
 st.write("")
 st.write("")
+
+# Database viewer function
+def view_sql_data(server, database):
+    try:
+        # Try different connection strings
+        connection_strings = [
+            # Option 1: Basic connection
+            f'DRIVER={{SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;',
+            
+            # Option 2: With instance name
+            f'DRIVER={{SQL Server}};SERVER=localhost\\{server.split("\\")[-1]};DATABASE={database};Trusted_Connection=yes;',
+            
+            # Option 3: With full settings
+            f'DRIVER={{SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;TrustServerCertificate=yes;Encrypt=no;',
+            
+            # Option 4: Using TCP
+            f'DRIVER={{SQL Server}};SERVER=tcp:{server};DATABASE={database};Trusted_Connection=yes;'
+        ]
+        
+        conn = None
+        error_messages = []
+        
+        # Try each connection string
+        for conn_str in connection_strings:
+            try:
+                st.write(f"Trying connection: {conn_str}")  # Debug info
+                conn = pyodbc.connect(conn_str, timeout=10)
+                break
+            except Exception as e:
+                error_messages.append(str(e))
+                continue
+        
+        if not conn:
+            st.error("Could not connect to database. Errors:")
+            for msg in error_messages:
+                st.error(msg)
+            return False
+        
+        # Get list of tables
+        cursor = conn.cursor()
+        tables = cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'").fetchall()
+        
+        # Let user select table
+        table_names = [table[0] for table in tables]
+        selected_table = st.selectbox("Select Table", table_names)
+        
+        if selected_table:
+            # Get and display table data
+            query = f"SELECT * FROM {selected_table}"
+            df = pd.read_sql(query, conn)
+            st.dataframe(df)
+            
+            # Add export button
+            if not df.empty:
+                csv = df.to_csv(index=False)
+                st.download_button(
+                    "Download as CSV",
+                    csv,
+                    f"{selected_table}.csv",
+                    "text/csv",
+                    key='download-csv'
+                )
+        
+        conn.close()
+        return True
+        
+    except Exception as e:
+        st.error(f"Database error: {str(e)}")
+        return False
