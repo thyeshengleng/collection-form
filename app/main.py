@@ -49,13 +49,11 @@ def render_db_form():
     # Add a server name selector
     server_options = [
         "Select a server...",
-        ".",
-        ".\\SQLEXPRESS",
-        "localhost",
-        "localhost\\SQLEXPRESS",
-        "(local)",
-        "(local)\\SQLEXPRESS",
-        f"{os.environ['COMPUTERNAME']}\\SQLEXPRESS"  # Add computer name
+        ".",  # Local server
+        "(local)",  # Local server
+        "localhost",  # Local server
+        f"{os.environ['COMPUTERNAME']}",  # Computer name
+        f"{os.environ['COMPUTERNAME']},1433"  # Computer name with port
     ]
     server_name = st.selectbox(
         "Select or Enter Server Name",
@@ -86,9 +84,10 @@ def render_db_form():
             try:
                 server = server_name.replace('\\', '\\\\')
                 conn_str = (
-                    f'DRIVER={{SQL Server}};'  # Use SQL Server driver for 2006
+                    f'DRIVER={{SQL Server}};'
                     f'SERVER={server};'
                     'Trusted_Connection=yes;'
+                    'Network=DBMSSOCN;'  # Add this for older SQL Server
                 )
                 conn = pyodbc.connect(conn_str)
                 conn.close()
@@ -102,10 +101,11 @@ def render_db_form():
             try:
                 server = server_name.replace('\\', '\\\\')
                 conn_str = (
-                    f'DRIVER={{SQL Server}};'  # Use SQL Server driver for 2006
+                    f'DRIVER={{SQL Server}};'
                     f'SERVER={server};'
                     f'DATABASE={database_name};'
                     'Trusted_Connection=yes;'
+                    'Network=DBMSSOCN;'  # Add this for older SQL Server
                 )
                 
                 # Try to connect and fetch data
@@ -161,22 +161,25 @@ def render_db_form():
                 """)
 
     # Add troubleshooting info
-    with st.expander("🔧 Troubleshooting"):
+    with st.expander("🔧 SQL Server 2006 Troubleshooting"):
         st.markdown("""
-        1. **Check SQL Server Configuration Manager**:
-           - Open "SQL Server Configuration Manager"
-           - Go to "SQL Server Services"
-           - Make sure "SQL Server (SQLEXPRESS)" is Running
-           - Go to "SQL Server Network Configuration" > "Protocols"
-           - Enable TCP/IP
-           - Restart SQL Server service
+        1. **Check SQL Server Services**:
+           - Open "Services" (services.msc)
+           - Make sure "SQL Server" is Running
+           - Make sure "SQL Server Browser" is Running
         
-        2. **Common server names**:
-           - `.` (local default instance)
-           - `.\\SQLEXPRESS` (local SQL Express)
-           - `localhost\\SQLEXPRESS`
-           - `(local)\\SQLEXPRESS`
-           - `COMPUTERNAME\\SQLEXPRESS`
+        2. **Common server names for SQL 2006**:
+           - `.` (local server)
+           - `(local)`
+           - `localhost`
+           - `COMPUTERNAME`
+           - `COMPUTERNAME,1433` (with port number)
+        
+        3. **Check SQL Server Configuration**:
+           - Make sure SQL Server is running
+           - Enable TCP/IP protocol
+           - Default port is 1433
+           - Try using IP address if server name doesn't work
         """)
 
 def main():
