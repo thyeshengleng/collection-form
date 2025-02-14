@@ -16,6 +16,11 @@ export default {
           return new Response(null, { headers: corsHeaders });
         }
 
+        // Make sure FORM_DATA is available
+        if (!env.FORM_DATA) {
+          throw new Error('KV namespace FORM_DATA not found');
+        }
+
         if (request.method === 'POST') {
           const formData = await request.json();
           await env.FORM_DATA.put('collection_records', JSON.stringify(formData));
@@ -36,7 +41,7 @@ export default {
         }
       }
 
-      // Update this URL to your actual Streamlit app URL
+      // Return the HTML page for other routes
       return new Response(`
         <!DOCTYPE html>
         <html>
@@ -45,10 +50,10 @@ export default {
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <script>
-                window.location.href = 'https://share.streamlit.io/thyeshengleng/collection-form/main/app.py';
+                window.location.href = 'https://collection-form.streamlit.app';
             </script>
         </head>
-        <body style="font-family: Arial, sans-serif; text-align: center; padding-top: 50px;">
+        <body>
             <h1>Collection Action List</h1>
             <p>Loading application...</p>
         </body>
