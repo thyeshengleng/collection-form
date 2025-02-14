@@ -1,6 +1,5 @@
 streamlit==1.32.0
-pandas>=2.0.3
-numpy>=1.26.0  # Updated for Python 3.12 compatibility
+pandas==2.0.3
 requests==2.31.0
 python-dotenv==1.0.0
 PyPDF2==3.0.1

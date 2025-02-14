@@ -4,7 +4,6 @@ from datetime import datetime
 import os
 import time
 import requests
-import pyodbc
 
 st.set_page_config(page_title="Collection Action List", layout="centered")
 
@@ -19,12 +18,6 @@ if 'selected_record' not in st.session_state:
 # Initialize session state for success message
 if 'show_success_message' not in st.session_state:
     st.session_state.show_success_message = False
-
-# Initialize session state for database connection
-if 'db_connected' not in st.session_state:
-    st.session_state.db_connected = False
-if 'conn_str' not in st.session_state:
-    st.session_state.conn_str = None
 
 # Your Cloudflare Worker URL
 WORKER_URL = "https://collection-form.lengthyesheng0721.workers.dev"
@@ -424,118 +417,3 @@ if st.session_state.show_success_message:
 # Add some padding at the bottom
 st.write("")
 st.write("")
-
-def connect_to_database(server, database, trusted=True, username=None, password=None):
-    try:
-        if trusted:
-            conn_str = f'DRIVER={{SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
-        else:
-            conn_str = f'DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
-        
-        conn = pyodbc.connect(conn_str)
-        st.session_state.conn_str = conn_str
-        return conn
-    except Exception as e:
-        st.error(f"Connection Error: {str(e)}")
-        return None
-
-def get_tables(conn):
-    try:
-        query = """
-        SELECT TABLE_NAME 
-        FROM INFORMATION_SCHEMA.TABLES 
-        WHERE TABLE_TYPE = 'BASE TABLE'
-        """
-        return pd.read_sql(query, conn)
-    except Exception as e:
-        st.error(f"Error getting tables: {str(e)}")
-        return pd.DataFrame()
-
-def get_table_data(conn, table_name):
-    try:
-        query = f"SELECT * FROM {table_name}"
-        return pd.read_sql(query, conn)
-    except Exception as e:
-        st.error(f"Error getting table data: {str(e)}")
-        return pd.DataFrame()
-
-# Main app
-st.title("SQL Server Database Viewer")
-
-# Database connection section
-with st.sidebar:
-    st.header("Database Connection")
-    server_name = st.text_input("Server Name", "localhost")
-    database_name = st.text_input("Database Name")
-    
-    auth_type = st.radio("Authentication", ["Windows Authentication", "SQL Server Authentication"])
-    
-    if auth_type == "SQL Server Authentication":
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        if st.button("Connect"):
-            conn = connect_to_database(server_name, database_name, False, username, password)
-            if conn:
-                st.session_state.db_connected = True
-                st.success("Connected successfully!")
-                conn.close()
-    else:
-        if st.button("Connect"):
-            conn = connect_to_database(server_name, database_name)
-            if conn:
-                st.session_state.db_connected = True
-                st.success("Connected successfully!")
-                conn.close()
-
-# Main content
-if st.session_state.db_connected and st.session_state.conn_str:
-    try:
-        conn = pyodbc.connect(st.session_state.conn_str)
-        
-        # Get and display tables
-        tables_df = get_tables(conn)
-        if not tables_df.empty:
-            selected_table = st.selectbox("Select Table", tables_df['TABLE_NAME'].tolist())
-            
-            if selected_table:
-                # Get and display table data
-                data = get_table_data(conn, selected_table)
-                if not data.empty:
-                    st.subheader(f"Table: {selected_table}")
-                    
-                    # Add search functionality
-                    search_term = st.text_input("Search in table", "")
-                    if search_term:
-                        # Search across all columns
-                        mask = data.astype(str).apply(lambda x: x.str.contains(search_term, case=False)).any(axis=1)
-                        data = data[mask]
-                    
-                    # Display table with options
-                    st.dataframe(
-                        data,
-                        use_container_width=True,
-                        hide_index=True
-                    )
-                    
-                    # Export options
-                    if st.button("Export to CSV"):
-                        csv = data.to_csv(index=False)
-                        st.download_button(
-                            label="Download CSV",
-                            data=csv,
-                            file_name=f"{selected_table}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                            mime="text/csv"
-                        )
-        
-        conn.close()
-        
-    except Exception as e:
-        st.error(f"Error: {str(e)}")
-        st.session_state.db_connected = False
-
-# Disconnect button
-if st.session_state.db_connected:
-    if st.sidebar.button("Disconnect"):
-        st.session_state.db_connected = False
-        st.session_state.conn_str = None
-        st.rerun()
