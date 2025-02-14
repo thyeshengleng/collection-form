@@ -1,5 +1,5 @@
 # Cloudflare Worker URL
-WORKER_URL = "https://collection-form.lengthyesheng0721.workers.dev"
+WORKER_URL = "https://collection-form.southlinks.workers.dev"
 
 # Form settings
 PLUGIN_OPTIONS = [
