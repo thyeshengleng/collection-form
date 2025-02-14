@@ -9,6 +9,10 @@ import requests
 # Initialize session state for database connection
 if 'db_connected' not in st.session_state:
     st.session_state.db_connected = False
+if 'server_name' not in st.session_state:
+    st.session_state.server_name = ""
+if 'database_name' not in st.session_state:
+    st.session_state.database_name = ""
 
 # Hide Streamlit menu and footer
 st.set_page_config(
@@ -43,13 +47,15 @@ if 'show_success_message' not in st.session_state:
 WORKER_URL = "https://collection-form.southlinks.workers.dev"
 
 # Database connection function
-def connect_to_db():
+def connect_to_db(server, database):
     try:
         conn = pyodbc.connect(
             'DRIVER={SQL Server};'
-            'SERVER=localhost\A2006;'           # Using localhost
-            'DATABASE=AED_AssignmentOne;'
+            f'SERVER={server};'
+            f'DATABASE={database};'
             'Trusted_Connection=yes;'
+            'TrustServerCertificate=yes;'
+            'Encrypt=no;'
         )
         return conn
     except Exception as e:
@@ -59,7 +65,7 @@ def connect_to_db():
 # Function to load records from SQL
 def load_records():
     try:
-        conn = connect_to_db()
+        conn = connect_to_db(st.session_state.server_name, st.session_state.database_name)
         if conn:
             query = "SELECT * FROM CollectionActionList"  # Replace with your table name
             df = pd.read_sql(query, conn)
@@ -73,7 +79,7 @@ def load_records():
 # Function to save record to SQL
 def save_record(form_data):
     try:
-        conn = connect_to_db()
+        conn = connect_to_db(st.session_state.server_name, st.session_state.database_name)
         if conn:
             cursor = conn.cursor()
             
@@ -116,7 +122,7 @@ def save_record(form_data):
 # Function to update record in SQL
 def update_record(record_id, form_data):
     try:
-        conn = connect_to_db()
+        conn = connect_to_db(st.session_state.server_name, st.session_state.database_name)
         if conn:
             cursor = conn.cursor()
             
@@ -169,7 +175,7 @@ def update_record(record_id, form_data):
 # Function to delete record from SQL
 def delete_record(record_id):
     try:
-        conn = connect_to_db()
+        conn = connect_to_db(st.session_state.server_name, st.session_state.database_name)
         if conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM CollectionActionList WHERE ID = ?", record_id)
@@ -183,7 +189,7 @@ def delete_record(record_id):
 # Create SQL table if it doesn't exist
 def create_table():
     try:
-        conn = connect_to_db()
+        conn = connect_to_db(st.session_state.server_name, st.session_state.database_name)
         if conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -227,148 +233,41 @@ crud_mode = st.radio(
     horizontal=True
 )
 
-if crud_mode == "Create New Record":
-    st.session_state.edit_mode = False
-    st.session_state.selected_record = None
+# Database Connection Form
+if not st.session_state.db_connected:
+    st.title("Database Connection")
     
-    # User Type Selection in a single column
-    st.subheader("User Type")
-    new_user = st.checkbox("New User")
-    existing_user = st.checkbox("Existing User")
-
-    if st.session_state.form_submitted and not (new_user or existing_user):
-        st.error("Please select a user type")
-
-    # Create form fields
-    st.subheader("Company Information")
-    company_name = st.text_input("COMPANY NAME", value="")
-    if st.session_state.form_submitted and not company_name:
-        st.error("Company name is required")
-
-    email = st.text_input("EMAIL", value="")
-    if st.session_state.form_submitted and not email:
-        st.error("Email is required")
-    elif st.session_state.form_submitted and '@' not in email:
-        st.error("Please enter a valid email address")
-
-    address = st.text_area("ADDRESS", value="")
-    if st.session_state.form_submitted and not address:
-        st.error("Address is required")
-
-    business_info = st.text_input("BUSINESS INFO", value="")
-    if st.session_state.form_submitted and not business_info:
-        st.error("Business info is required")
-
-    tax_id = st.text_input("TAX ID", value="")
-    if st.session_state.form_submitted and not tax_id:
-        st.error("Tax ID is required")
-
-    e_invoice_start_date = st.date_input("E-INVOICE START DATE", value=None)
-    if st.session_state.form_submitted and not e_invoice_start_date:
-        st.error("E-Invoice start date is required")
-
-    # Checkboxes for Plug in Module
-    st.subheader("PLUG IN MODULE")
-    plugin_options = [
-        "Deposit Plugin",
-        "Fix Asset Plugin",
-        "Shipment Plugin",
-        "Stock Request Plugin",
-        "Doc Control Plugin"
-    ]
-
-    # Display plugins in a single column for mobile
-    selected_plugins = []
-    for plugin in plugin_options:
-        if st.checkbox(plugin):
-            selected_plugins.append(plugin)
-
-    if st.session_state.form_submitted and not selected_plugins:
-        st.error("Please select at least one plugin")
-
-    st.subheader("Additional Information")
-    vpn_info = st.text_input("VPN INFO", value="")
-    if st.session_state.form_submitted and not vpn_info:
-        st.error("VPN info is required")
-
-    module_license = st.text_input("MODULE & USER LICENSE", value="")
-    if st.session_state.form_submitted and not module_license:
-        st.error("Module & User License is required")
-
-    # Report Design Template section with checkboxes
-    st.subheader("Reports")
-    st.markdown("### REPORT DESIGN TEMPLATE *")
-    report_options = ["SO", "DO", "INV", "PO", "PICKING LIST"]
-    selected_reports = []
-    
-    # Create two columns for report options
-    report_cols = st.columns(2)
-    for idx, report in enumerate(report_options):
-        with report_cols[idx % 2]:
-            if st.checkbox(report, key=f"report_{report}"):
-                selected_reports.append(report)
-    
-    if st.session_state.form_submitted and not selected_reports:
-        st.error("⚠️ Please select at least one report template!")
-
-    migration_master = st.text_input("MIGRATION MASTER DATA", value="")
-    migration_outstanding = st.text_input("MIGRATION (OUTSTANDING BALANCE)", value="")
-
-    st.subheader("Status")
-    status = st.selectbox("Status", ["", "pending", "complete", "AR/Ap, Stock pending"])
-    if st.session_state.form_submitted and not status:
-        st.error("Status is required")
-
-    # Add some spacing
-    st.write("")
-    st.write("")
-
-    if st.button("Save Record", use_container_width=True):
-        st.session_state.form_submitted = True
+    with st.form("db_connection"):
+        server_name = st.text_input("Server Name", value="DESKTOP-RMNV9QV\A2006")
+        database_name = st.text_input("Database Name", value="AED_AssignmentOne")
         
-        # Validate all required fields
-        is_valid = all([
-            new_user or existing_user,
-            company_name,
-            email and '@' in email,
-            address,
-            business_info,
-            tax_id,
-            e_invoice_start_date,
-            selected_plugins,
-            vpn_info,
-            module_license,
-            selected_reports,
-            migration_master,
-            migration_outstanding,
-            status
-        ])
+        col1, col2 = st.columns(2)
+        with col1:
+            connect_button = st.form_submit_button("Connect", use_container_width=True)
         
-        if is_valid:
-            # Create a dictionary of all the form data
-            form_data = {
-                "User Type": "New User" if new_user else "Existing User" if existing_user else "",
-                "Company Name": company_name,
-                "Email": email,
-                "Address": address,
-                "Business Info": business_info,
-                "Tax ID": tax_id,
-                "E-Invoice Start Date": e_invoice_start_date.strftime("%Y-%m-%d") if e_invoice_start_date else "",
-                "Plug In Module": ", ".join(selected_plugins) if selected_plugins else "",
-                "VPN Info": vpn_info,
-                "Module & User License": module_license,
-                "Report Design Template": ", ".join(selected_reports) if selected_reports else "",
-                "Migration Master Data": migration_master,
-                "Migration Outstanding Balance": migration_outstanding,
-                "Status": status
-            }
-            
-            save_record(form_data)
-            st.success("✅ Record saved successfully!")
-        else:
-            st.error("Please fill in all required fields correctly")
+        if connect_button:
+            conn = connect_to_db(server_name, database_name)
+            if conn:
+                st.session_state.db_connected = True
+                st.session_state.server_name = server_name
+                st.session_state.database_name = database_name
+                st.success("✅ Connected to database successfully!")
+                st.rerun()
+            conn.close()
 
-else:  # View/Edit Records
+# Main Application (only show if connected to database)
+if st.session_state.db_connected:
+    st.title("Collection Action List")
+    
+    # Add disconnect button in sidebar
+    with st.sidebar:
+        st.write(f"Connected to: {st.session_state.database_name}")
+        if st.button("Disconnect", use_container_width=True):
+            st.session_state.db_connected = False
+            st.session_state.server_name = ""
+            st.session_state.database_name = ""
+            st.rerun()
+    
     # Load and display existing records
     df = load_records()
     
