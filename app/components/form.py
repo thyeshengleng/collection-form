@@ -3,6 +3,43 @@ from datetime import datetime
 from app.config.settings import PLUGIN_OPTIONS, REPORT_OPTIONS, STATUS_OPTIONS
 from app.utils.database import create_record
 
+def handle_form_submit(new_user, existing_user, company_name, email, address,
+                      business_info, tax_id, e_invoice_start_date, selected_plugins,
+                      vpn_info, module_license, selected_reports, migration_master,
+                      migration_outstanding, status):
+    # Validate required fields
+    if not (new_user or existing_user):
+        st.error("Please select a user type")
+        return None
+    
+    if not company_name or not email:
+        st.error("Company Name and Email are required")
+        return None
+
+    # Create form data dictionary
+    form_data = {
+        "User Type": "New User" if new_user else "Existing User",
+        "Company Name": company_name,
+        "Email": email,
+        "Address": address,
+        "Business Info": business_info,
+        "Tax ID": tax_id,
+        "E-Invoice Start Date": e_invoice_start_date.strftime("%Y-%m-%d") if e_invoice_start_date else "",
+        "Plug In Module": ", ".join(selected_plugins),
+        "VPN Info": vpn_info,
+        "Module & User License": module_license,
+        "Report Design Template": ", ".join(selected_reports),
+        "Migration Master Data": migration_master,
+        "Migration Outstanding Balance": migration_outstanding,
+        "Status": status
+    }
+
+    # Create record in database
+    df = create_record(form_data)
+    st.success(f"✅ Record for {company_name} created successfully!")
+    st.session_state.form_submitted = False
+    return df
+
 def render_create_form():
     st.session_state.edit_mode = False
     st.session_state.selected_record = None
