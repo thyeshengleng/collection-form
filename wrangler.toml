@@ -12,6 +12,9 @@ id = "1e980c8c22084d088f192e18d5d9e9d9"
 [site.assets]
 include = ["public/**/*"]
 
+[build]
+command = "pip install -r requirements.txt"
+
 # Add logging configuration
 [observability]
 [observability.logs]
