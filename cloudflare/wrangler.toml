@@ -16,4 +16,5 @@ id = "9992ed9592824f479199b430befc6162"
 enabled = true
 
 [dev]
-port = 8787 
+port = 8787
+local_protocol = "http" 
