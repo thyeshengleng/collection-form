@@ -20,21 +20,48 @@ def render_db_form():
     if 'is_connected' not in st.session_state:
         st.session_state.is_connected = False
     
-    # Server name input
+    # Help text
+    st.info("""
+    📌 Before connecting:
+    1. Make sure SQL Server is installed and running
+    2. Check SQL Server Configuration Manager:
+       - SQL Server Services > SQL Server (instance_name) should be Running
+       - SQL Server Network Configuration > Protocols > TCP/IP should be Enabled
+    3. Try restarting SQL Server service if needed
+    """)
+    
+    # Server name input with examples
+    st.markdown("### Server Name")
+    st.caption("Common formats:")
+    st.code("localhost\\SQLEXPRESS")
+    st.code("(local)\\SQLEXPRESS")
+    st.code("DESKTOP-ABC\\SQLEXPRESS")
+    st.code("localhost,1433")
+    
     server_name = st.text_input(
-        "Server Name",
+        "Enter Server Name",
         value=st.session_state.server_name,
-        placeholder="Enter server name (e.g., DESKTOP-ABC\\SQLEXPRESS)",
         help="Your SQL Server instance name"
     )
     
     # Database name input
+    st.markdown("### Database Name")
     database_name = st.text_input(
-        "Database Name",
+        "Enter Database Name",
         value=st.session_state.database_name,
-        placeholder="Enter database name",
         help="The name of your database"
     )
+    
+    # Test connection options
+    auth_method = st.radio(
+        "Authentication Method",
+        ["Windows Authentication", "SQL Server Authentication"],
+        horizontal=True
+    )
+    
+    if auth_method == "SQL Server Authentication":
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
     
     # Connect button
     if st.button("Connect to Database", use_container_width=True):
@@ -42,13 +69,23 @@ def render_db_form():
             # Clean up server name to handle backslashes
             server = server_name.replace('\\', '\\\\')
             
-            conn_str = (
-                f'DRIVER={{ODBC Driver 17 for SQL Server}};'
-                f'SERVER={server};'
-                f'DATABASE={database_name};'
-                'Trusted_Connection=yes;'
-                'TrustServerCertificate=yes;'
-            )
+            if auth_method == "Windows Authentication":
+                conn_str = (
+                    f'DRIVER={{ODBC Driver 17 for SQL Server}};'
+                    f'SERVER={server};'
+                    f'DATABASE={database_name};'
+                    'Trusted_Connection=yes;'
+                    'TrustServerCertificate=yes;'
+                )
+            else:
+                conn_str = (
+                    f'DRIVER={{ODBC Driver 17 for SQL Server}};'
+                    f'SERVER={server};'
+                    f'DATABASE={database_name};'
+                    f'UID={username};'
+                    f'PWD={password};'
+                    'TrustServerCertificate=yes;'
+                )
             
             # Try to connect
             conn = pyodbc.connect(conn_str)
@@ -65,6 +102,14 @@ def render_db_form():
             
         except Exception as e:
             st.error(f"❌ Connection failed: {str(e)}")
+            st.error("""
+            Common solutions:
+            1. Check if SQL Server is running
+            2. Verify server name is correct
+            3. Make sure database exists
+            4. Enable TCP/IP in SQL Server Configuration Manager
+            5. Check Windows Firewall settings
+            """)
             st.session_state.is_connected = False
 
 def main():
