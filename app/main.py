@@ -30,6 +30,7 @@ def render_db_form():
     
     # Add a server name selector
     server_options = [
+        "Select a server...",
         ".",
         ".\\SQLEXPRESS",
         "localhost",
@@ -40,10 +41,15 @@ def render_db_form():
     server_name = st.selectbox(
         "Select or Enter Server Name",
         options=server_options,
-        index=None,
-        placeholder="Choose a server name or type your own",
-        value=st.session_state.server_name
+        key="server_selector"
     )
+    
+    if server_name == "Select a server...":
+        server_name = st.text_input(
+            "Or enter custom server name",
+            value=st.session_state.server_name,
+            help="Your SQL Server instance name"
+        )
     
     # Database name input
     st.markdown("### Database Name")
