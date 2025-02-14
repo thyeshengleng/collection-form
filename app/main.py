@@ -17,26 +17,13 @@ def render_db_form():
         st.session_state.server_name = ""
     if 'database_name' not in st.session_state:
         st.session_state.database_name = ""
-    if 'is_connected' not in st.session_state:
-        st.session_state.is_connected = False
     
-    # Help text
-    st.info("""
-    📌 Before connecting:
-    1. Make sure SQL Server is installed and running
-    2. Check SQL Server Configuration Manager:
-       - SQL Server Services > SQL Server (instance_name) should be Running
-       - SQL Server Network Configuration > Protocols > TCP/IP should be Enabled
-    3. Try restarting SQL Server service if needed
-    """)
-    
-    # Server name input with examples
+    # Help text and examples
     st.markdown("### Server Name")
     st.caption("Common formats:")
     st.code("localhost\\SQLEXPRESS")
     st.code("(local)\\SQLEXPRESS")
     st.code("DESKTOP-ABC\\SQLEXPRESS")
-    st.code("localhost,1433")
     
     server_name = st.text_input(
         "Enter Server Name",
@@ -52,65 +39,13 @@ def render_db_form():
         help="The name of your database"
     )
     
-    # Test connection options
-    auth_method = st.radio(
-        "Authentication Method",
-        ["Windows Authentication", "SQL Server Authentication"],
-        horizontal=True
-    )
-    
-    if auth_method == "SQL Server Authentication":
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-    
-    # Connect button
-    if st.button("Connect to Database", use_container_width=True):
-        try:
-            # Clean up server name to handle backslashes
-            server = server_name.replace('\\', '\\\\')
-            
-            if auth_method == "Windows Authentication":
-                conn_str = (
-                    f'DRIVER={{ODBC Driver 17 for SQL Server}};'
-                    f'SERVER={server};'
-                    f'DATABASE={database_name};'
-                    'Trusted_Connection=yes;'
-                    'TrustServerCertificate=yes;'
-                )
-            else:
-                conn_str = (
-                    f'DRIVER={{ODBC Driver 17 for SQL Server}};'
-                    f'SERVER={server};'
-                    f'DATABASE={database_name};'
-                    f'UID={username};'
-                    f'PWD={password};'
-                    'TrustServerCertificate=yes;'
-                )
-            
-            # Try to connect
-            conn = pyodbc.connect(conn_str)
-            conn.close()
-            
-            # Save connection info to session state
-            st.session_state.server_name = server_name
-            st.session_state.database_name = database_name
-            st.session_state.is_connected = True
-            
-            st.success("✅ Connected to database successfully!")
-            time.sleep(1)
-            st.rerun()
-            
-        except Exception as e:
-            st.error(f"❌ Connection failed: {str(e)}")
-            st.error("""
-            Common solutions:
-            1. Check if SQL Server is running
-            2. Verify server name is correct
-            3. Make sure database exists
-            4. Enable TCP/IP in SQL Server Configuration Manager
-            5. Check Windows Firewall settings
-            """)
-            st.session_state.is_connected = False
+    # Save button
+    if st.button("Save Connection Info", use_container_width=True):
+        st.session_state.server_name = server_name
+        st.session_state.database_name = database_name
+        st.success("✅ Connection info saved!")
+        time.sleep(1)
+        st.rerun()
 
 def main():
     # Initialize app configuration
@@ -153,22 +88,14 @@ def main():
     if crud_mode == "Database Connection":
         render_db_form()
     elif crud_mode == "Create New Record":
-        if st.session_state.is_connected:
-            render_create_form()
-        else:
-            st.warning("Please connect to database first")
-            render_db_form()
+        render_create_form()
     else:  # View/Edit Records
-        if st.session_state.is_connected:
-            df, edited_df = render_records_table()
-            if df is not None and edited_df is not None:
-                # Handle edit/delete operations
-                selected_rows = edited_df[edited_df["Select"] == True]
-                if not selected_rows.empty:
-                    handle_selected_rows(selected_rows, df)
-        else:
-            st.warning("Please connect to database first")
-            render_db_form()
+        df, edited_df = render_records_table()
+        if df is not None and edited_df is not None:
+            # Handle edit/delete operations
+            selected_rows = edited_df[edited_df["Select"] == True]
+            if not selected_rows.empty:
+                handle_selected_rows(selected_rows, df)
 
 def handle_selected_rows(selected_rows, df):
     if len(selected_rows) == 1:
