@@ -47,10 +47,9 @@ def connect_to_db():
     try:
         conn = pyodbc.connect(
             'DRIVER={SQL Server};'
-            'SERVER=your_server_name;'
-            'DATABASE=your_database;'
-            'UID=your_username;'          # Replace with your username
-            'PWD=your_password;'          # Replace with your password
+            'SERVER=your_server_name;'  # Replace with your SQL Server name
+            'DATABASE=your_database;'    # Replace with your database name
+            'Trusted_Connection=yes;'    # Windows Authentication
         )
         return conn
     except Exception as e:
