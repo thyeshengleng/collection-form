@@ -1,9 +1,10 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-import os
 import time
 import requests
+from utils.database import load_records, save_records, create_record, update_record, delete_record
+from config.settings import WORKER_URL, PLUGIN_OPTIONS, REPORT_OPTIONS, STATUS_OPTIONS
 
 # Hide Streamlit menu and footer
 st.set_page_config(
@@ -29,95 +30,8 @@ if 'edit_mode' not in st.session_state:
     st.session_state.edit_mode = False
 if 'selected_record' not in st.session_state:
     st.session_state.selected_record = None
-
-# Initialize session state for success message
 if 'show_success_message' not in st.session_state:
     st.session_state.show_success_message = False
-
-# Your Cloudflare Worker URL
-WORKER_URL = "https://collection-form.southlinks.workers.dev"
-
-# Database connection function
-def connect_to_db(server, database):
-    try:
-        # Clean up server name to handle backslashes
-        server = server.replace('\\', '\\\\')
-        
-        conn_str = (
-            f'DRIVER={{ODBC Driver 17 for SQL Server}};'
-            f'SERVER={server};'
-            f'DATABASE={database};'
-            'Trusted_Connection=yes;'
-            'TrustServerCertificate=yes;'
-        )
-        
-        # Print connection string for debugging
-        print(f"Connection string: {conn_str}")
-        
-        conn = pyodbc.connect(conn_str)
-        return conn
-    except Exception as e:
-        st.error(f"Database connection error: {str(e)}")
-        # Print available drivers for debugging
-        print("Available drivers:", [x for x in pyodbc.drivers()])
-        return None
-
-# Function to load records from SQL
-def load_records():
-    try:
-        conn = connect_to_db(st.session_state.server_name, st.session_state.database_name)
-        if conn:
-            query = "SELECT * FROM CollectionActionList"  # Replace with your table name
-            df = pd.read_sql(query, conn)
-            conn.close()
-            return df
-        return pd.DataFrame()
-    except Exception as e:
-        st.error(f"Error loading records: {str(e)}")
-=======
-# Function to load records from Cloudflare KV
-def load_records():
-    try:
-        response = requests.get(f"{WORKER_URL}/api/form")
-        if response.status_code == 200:
-            data = response.json()
-            return pd.DataFrame(data) if data else pd.DataFrame()
-    except:
-        return pd.DataFrame()
-
-# Function to save records to Cloudflare KV
-def save_records(df):
-    try:
-        records = df.to_dict('records')
-        requests.post(f"{WORKER_URL}/api/form", json=records)
-    except:
-        st.error("Failed to save data")
-
-# CRUD Operations
-def create_record(form_data):
-    df = load_records()
-    # Convert all values to string before creating new record
-    form_data = {k: str(v) for k, v in form_data.items()}
-    new_df = pd.DataFrame([form_data])
-    df = pd.concat([df, new_df], ignore_index=True)
-    save_records(df)
-    return df
-
-def update_record(index, form_data):
-    df = load_records()
-    # Convert all values to string before updating
-    form_data = {k: str(v) for k, v in form_data.items()}
-    for key, value in form_data.items():
-        df.at[index, key] = value
-    save_records(df)
-    return df
-
-def delete_record(index):
-    df = load_records()
-    df = df.drop(index)
-    df = df.reset_index(drop=True)
-    save_records(df)
-    return df
 
 # Main title
 st.title("Collection Action List")
