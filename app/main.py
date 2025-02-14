@@ -39,13 +39,71 @@ def render_db_form():
         help="The name of your database"
     )
     
-    # Save button
-    if st.button("Save Connection Info", use_container_width=True):
-        st.session_state.server_name = server_name
-        st.session_state.database_name = database_name
-        st.success("✅ Connection info saved!")
-        time.sleep(1)
-        st.rerun()
+    # View Data button
+    if st.button("View Database Data", use_container_width=True):
+        try:
+            # Clean up server name to handle backslashes
+            server = server_name.replace('\\', '\\\\')
+            
+            conn_str = (
+                f'DRIVER={{ODBC Driver 17 for SQL Server}};'
+                f'SERVER={server};'
+                f'DATABASE={database_name};'
+                'Trusted_Connection=yes;'
+                'TrustServerCertificate=yes;'
+            )
+            
+            # Try to connect and fetch data
+            conn = pyodbc.connect(conn_str)
+            query = """
+                SELECT TOP 1000 
+                    AccNo,
+                    CompanyName,
+                    RegisterNo,
+                    Address1,
+                    Address2,
+                    Address3,
+                    Address4,
+                    PostCode,
+                    Phone1,
+                    Phone2,
+                    EmailAddress,
+                    WebURL,
+                    NatureOfBusiness,
+                    IsActive
+                FROM Debtor
+                ORDER BY CompanyName
+            """
+            df = pd.read_sql(query, conn)
+            conn.close()
+            
+            # Save connection info to session state
+            st.session_state.server_name = server_name
+            st.session_state.database_name = database_name
+            
+            # Display data in an interactive table
+            st.success("✅ Connected successfully! Showing database records:")
+            st.dataframe(
+                df,
+                hide_index=True,
+                use_container_width=True,
+                column_config={
+                    "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
+                    "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
+                    "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
+                    "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
+                }
+            )
+            
+        except Exception as e:
+            st.error(f"❌ Error: {str(e)}")
+            st.error("""
+            Common solutions:
+            1. Check if SQL Server is running
+            2. Verify server name is correct
+            3. Make sure database exists
+            4. Enable TCP/IP in SQL Server Configuration Manager
+            """)
 
 def main():
     # Initialize app configuration
