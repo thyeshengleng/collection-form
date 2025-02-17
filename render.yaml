@@ -2,9 +2,12 @@ services:
   - type: web
     name: collection-form-api
     env: python
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn api_server:app --host 0.0.0.0 --port $PORT
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.21
       - key: DB_SERVER
         value: DESKTOP-RMNV9QV\A2006
       - key: DB_NAME
@@ -13,5 +16,5 @@ services:
         value: sa
       - key: DB_PASSWORD
         value: oCt2005-ShenZhou6_A2006
-    healthCheckPath: /health
+    healthCheckPath: /
     autoDeploy: true
