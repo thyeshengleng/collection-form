@@ -17,42 +17,76 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Use CSV for cloud deployment
-            is_cloud = st.secrets.get("is_streamlit_cloud", False)
+            # Get database credentials from secrets
+            server = st.secrets.get("DB_SERVER", "DESKTOP-RMNV9QV\\A2006")
+            database = st.secrets.get("DB_NAME", "AED_AssignmentOne")
+            username = st.secrets.get("DB_USER", "sa")
+            password = st.secrets.get("DB_PASSWORD", "oCt2005-ShenZhou6_A2006")
             
-            if is_cloud:
-                # Load from CSV
-                df = pd.read_csv("collection_records.csv")
-                st.success("✅ Data loaded from CSV!")
-            else:
-                # Local database connection
-                params = urllib.parse.quote_plus(
-                    'DRIVER={ODBC Driver 17 for SQL Server};'
-                    'SERVER=DESKTOP-RMNV9QV\\A2006;'
-                    'DATABASE=AED_AssignmentOne;'
-                    'UID=sa;'
-                    'PWD=oCt2005-ShenZhou6_A2006;'
-                    'Trusted_Connection=no;'
-                )
-                
-                engine = create_engine(f"mssql+pyodbc:///?odbc_connect={params}")
-                
+            # Create connection string
+            params = urllib.parse.quote_plus(
+                'DRIVER={ODBC Driver 17 for SQL Server};'
+                f'SERVER={server};'
+                f'DATABASE={database};'
+                f'UID={username};'
+                f'PWD={password};'
+                'Encrypt=yes;'
+                'TrustServerCertificate=no;'
+            )
+            
+            # Create SQLAlchemy engine
+            engine = create_engine(
+                f"mssql+pyodbc:///?odbc_connect={params}",
+                pool_pre_ping=True,
+                pool_recycle=3600
+            )
+            
+            # Try to connect and fetch data
+            with st.spinner("Connecting to database..."):
                 with engine.connect() as conn:
-                    query = """SELECT TOP 1000 * FROM Debtor ORDER BY CompanyName"""
+                    query = """
+                        SELECT TOP 1000 
+                            AccNo,
+                            CompanyName,
+                            RegisterNo,
+                            Address1,
+                            Address2,
+                            Address3,
+                            Address4,
+                            PostCode,
+                            Phone1,
+                            Phone2,
+                            EmailAddress,
+                            WebURL,
+                            NatureOfBusiness,
+                            IsActive
+                        FROM Debtor
+                        ORDER BY CompanyName
+                    """
                     df = pd.read_sql(query, conn)
                     
-                    # Save to CSV for cloud deployment
-                    df.to_csv("collection_records.csv", index=False)
+                    # Display data
+                    st.success("✅ Data retrieved successfully!")
+                    st.dataframe(
+                        df,
+                        hide_index=True,
+                        use_container_width=True,
+                        column_config={
+                            "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
+                            "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
+                            "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
+                            "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
+                        }
+                    )
             
         except Exception as e:
-            st.error(f"❌ Error: {str(e)}")
+            st.error(f"❌ Database Error: {str(e)}")
             st.error("""
             Please check:
-            1. SQL Server instance name is correct (A2006)
-            2. SQL Server service is running
-            3. SQL Server Browser service is running
-            4. Windows Authentication is enabled
-            5. TCP/IP protocol is enabled
+            1. Database credentials are correct
+            2. Database server is accessible
+            3. Firewall rules allow connection
+            4. Network connection is working
             """)
 
 def main():
