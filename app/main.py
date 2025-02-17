@@ -18,7 +18,7 @@ def render_db_form():
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
             # API endpoint
-            api_url = "http://localhost:8000/api/debtor"
+            api_url = "http://localhost:8001/api/debtor"
             
             # Try to fetch data
             with st.spinner("Fetching data..."):
@@ -52,6 +52,7 @@ def render_db_form():
             1. API server is running (python api_server.py)
             2. API endpoint is correct
             3. Network connection is working
+            4. No firewall blocking port 8001
             """)
 
 def main():
