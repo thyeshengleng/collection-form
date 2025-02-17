@@ -4,25 +4,11 @@ from datetime import datetime
 import time
 import requests
 import pyodbc
+from sqlalchemy import create_engine
 from app.utils.database import load_records, save_records, create_record, update_record, delete_record
 from app.components.form import render_create_form
 from app.components.table import render_records_table
 from app.components.edit_form import render_edit_form
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-def get_sql_driver():
-    """Try to find an available SQL Server driver"""
-    try:
-        import pyodbc
-        drivers = [x for x in pyodbc.drivers() if 'SQL Server' in x]
-        if drivers:
-            return drivers[0]
-        return None
-    except:
-        return None
 
 def render_db_form():
     st.subheader("Database Connection")
@@ -30,18 +16,22 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Hardcoded connection details for SQL Server 2006
+            # Create connection string with double backslashes for escape sequence
+            server = "DESKTOP-RMNV9QV\\\\A2006"  # Double backslashes to escape
             conn_str = (
-                'DRIVER={SQL Server};'  # Old SQL Server driver
-                'SERVER=DESKTOP-RMNV9QV\\A2006;'
+                'DRIVER={SQL Server};'
+                f'SERVER={server};'
                 'DATABASE=AED_AssignmentOne;'
                 'UID=sa;'
                 'PWD=oCt2005-ShenZhou6_A2006;'
             )
             
+            # Create SQLAlchemy engine
+            engine_str = f"mssql+pyodbc:///?odbc_connect={conn_str}"
+            engine = create_engine(engine_str)
+            
             # Try to connect and fetch data
             with st.spinner("Connecting to database..."):
-                conn = pyodbc.connect(conn_str)
                 query = """
                     SELECT TOP 1000 
                         AccNo,
@@ -61,8 +51,8 @@ def render_db_form():
                     FROM Debtor
                     ORDER BY CompanyName
                 """
-                df = pd.read_sql(query, conn)
-                conn.close()
+                # Use SQLAlchemy engine for pandas
+                df = pd.read_sql(query, engine)
             
             # Display data
             st.success("✅ Connected successfully! Showing database records:")
