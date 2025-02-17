@@ -9,6 +9,7 @@ from app.utils.database import load_records, save_records, create_record, update
 from app.components.form import render_create_form
 from app.components.table import render_records_table
 from app.components.edit_form import render_edit_form
+import urllib.parse
 
 def render_db_form():
     st.subheader("Database Connection")
@@ -17,64 +18,99 @@ def render_db_form():
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
             # Connection parameters
-            server = "DESKTOP-RMNV9QV\\A2006"
-            database = "AED_AssignmentOne"
-            username = "sa"
-            password = "oCt2005-ShenZhou6_A2006"
+            params = urllib.parse.quote_plus(
+                'DRIVER={SQL Server};'
+                'SERVER=DESKTOP-RMNV9QV\\A2006;'
+                'DATABASE=AED_AssignmentOne;'
+                'UID=sa;'
+                'PWD=oCt2005-ShenZhou6_A2006;'
+                'Trusted_Connection=no;'
+                'TrustServerCertificate=yes;'
+            )
             
-            # Create SQLAlchemy engine
-            connection_url = f"mssql+pyodbc://{username}:{password}@{server}/{database}?driver=ODBC+Driver+17+for+SQL+Server"
-            engine = create_engine(connection_url)
+            # Create SQLAlchemy engine with retry
+            engine = create_engine(
+                f"mssql+pyodbc:///?odbc_connect={params}",
+                pool_pre_ping=True,  # Check connection before using
+                pool_recycle=3600,   # Recycle connections after 1 hour
+                connect_args={
+                    'timeout': 30     # Connection timeout in seconds
+                }
+            )
             
             # Try to connect and fetch data
             with st.spinner("Connecting to database..."):
-                st.info("Attempting to connect to SQL Server...")
+                st.info("Testing connection...")
                 
-                # Use SQLAlchemy to query data
-                query = """
-                    SELECT TOP 1000 
-                        AccNo,
-                        CompanyName,
-                        RegisterNo,
-                        Address1,
-                        Address2,
-                        Address3,
-                        Address4,
-                        PostCode,
-                        Phone1,
-                        Phone2,
-                        EmailAddress,
-                        WebURL,
-                        NatureOfBusiness,
-                        IsActive
-                    FROM Debtor
-                    ORDER BY CompanyName
-                """
-                # Use pandas with SQLAlchemy engine
-                df = pd.read_sql(query, engine)
+                # Test connection first
+                try:
+                    with engine.connect() as conn:
+                        st.success("✅ Connection test successful!")
+                        
+                        # Now fetch data
+                        st.info("Fetching data...")
+                        query = """
+                            SELECT TOP 1000 
+                                AccNo,
+                                CompanyName,
+                                RegisterNo,
+                                Address1,
+                                Address2,
+                                Address3,
+                                Address4,
+                                PostCode,
+                                Phone1,
+                                Phone2,
+                                EmailAddress,
+                                WebURL,
+                                NatureOfBusiness,
+                                IsActive
+                            FROM Debtor
+                            ORDER BY CompanyName
+                        """
+                        df = pd.read_sql(query, conn)
+                        
+                        # Display data
+                        st.success("✅ Data retrieved successfully!")
+                        st.dataframe(
+                            df,
+                            hide_index=True,
+                            use_container_width=True,
+                            column_config={
+                                "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
+                                "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
+                                "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
+                                "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
+                            }
+                        )
                 
-                # Display data
-                st.success("✅ Connected successfully! Showing database records:")
-                st.dataframe(
-                    df,
-                    hide_index=True,
-                    use_container_width=True,
-                    column_config={
-                        "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
-                        "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
-                        "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
-                        "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
-                    }
-                )
+                except Exception as conn_error:
+                    st.error(f"❌ Connection failed: {str(conn_error)}")
+                    st.error("""
+                    Connection troubleshooting:
+                    1. Verify SQL Server is running:
+                       - Open Services (services.msc)
+                       - Find 'SQL Server (A2006)'
+                       - Make sure status is 'Running'
+                    
+                    2. Check SQL Server Configuration:
+                       - Open SQL Server Configuration Manager
+                       - Enable TCP/IP protocol
+                       - Restart SQL Server service
+                    
+                    3. Test connection locally:
+                       - Open SQL Server Management Studio
+                       - Try connecting with same credentials
+                    """)
             
         except Exception as e:
-            st.error(f"❌ Error: {str(e)}")
+            st.error(f"❌ Engine creation failed: {str(e)}")
             st.error("""
-            Please check:
-            1. SQL Server is running
-            2. Server name is correct
-            3. Credentials are correct
-            4. ODBC Driver 17 is installed
+            Setup troubleshooting:
+            1. Check ODBC Driver installation
+            2. Verify server name is correct
+            3. Check credentials
+            4. Make sure SQL Server port is open
             """)
 
 def main():
