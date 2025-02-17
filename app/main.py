@@ -16,22 +16,20 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Create connection string with double backslashes for escape sequence
-            server = "DESKTOP-RMNV9QV\\\\A2006"  # Double backslashes to escape
+            # Create connection string for SQL Server 2006
             conn_str = (
                 'DRIVER={SQL Server};'
-                f'SERVER={server};'
+                'SERVER=DESKTOP-RMNV9QV;'  # Try without instance name first
                 'DATABASE=AED_AssignmentOne;'
                 'UID=sa;'
                 'PWD=oCt2005-ShenZhou6_A2006;'
+                'Network=DBMSSOCN;'  # Force TCP/IP
+                'Port=12345;'        # Specify port
             )
-            
-            # Create SQLAlchemy engine
-            engine_str = f"mssql+pyodbc:///?odbc_connect={conn_str}"
-            engine = create_engine(engine_str)
             
             # Try to connect and fetch data
             with st.spinner("Connecting to database..."):
+                conn = pyodbc.connect(conn_str)
                 query = """
                     SELECT TOP 1000 
                         AccNo,
@@ -51,8 +49,8 @@ def render_db_form():
                     FROM Debtor
                     ORDER BY CompanyName
                 """
-                # Use SQLAlchemy engine for pandas
-                df = pd.read_sql(query, engine)
+                df = pd.read_sql(query, conn)
+                conn.close()
             
             # Display data
             st.success("✅ Connected successfully! Showing database records:")
@@ -70,6 +68,13 @@ def render_db_form():
             
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
+            st.error("""
+            Please check:
+            1. SQL Server is running
+            2. TCP/IP is enabled in SQL Server Configuration Manager
+            3. Port 12345 is open in Windows Firewall
+            4. SQL Server Browser service is running
+            """)
 
 def main():
     # Initialize app configuration
