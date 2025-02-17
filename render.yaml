@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: collection-form-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api_server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DB_SERVER
+        value: DESKTOP-RMNV9QV\A2006
+      - key: DB_NAME
+        value: AED_AssignmentOne
+      - key: DB_USER
+        value: sa
+      - key: DB_PASSWORD
+        value: oCt2005-ShenZhou6_A2006 

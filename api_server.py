@@ -11,10 +11,13 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# Enable CORS
+# Update CORS settings
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:8501",
+        "https://collection-form-u3uosjedoabyvvmr9pwfoa.streamlit.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
