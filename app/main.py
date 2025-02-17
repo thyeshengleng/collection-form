@@ -32,29 +32,17 @@ def render_db_form():
     if 'username' not in st.session_state:
         st.session_state.username = ""
     
-    # Check SQL Driver
-    driver = get_sql_driver()
-    if not driver:
-        st.error("""
-        ❌ No SQL Server driver found. Please install one of these:
-        1. ODBC Driver for SQL Server
-        2. FreeTDS
-        3. UnixODBC
-        
-        Installation commands:
-        - Ubuntu/Debian: `sudo apt-get install unixodbc unixodbc-dev freetds-dev freetds-bin tdsodbc`
-        - macOS: `brew install unixodbc freetds`
-        - Windows: Install "Microsoft ODBC Driver for SQL Server" from Microsoft's website
-        """)
-        return
-    
-    # Server input
+    # Server input with examples
     st.markdown("### Server Name")
-    st.caption("Example: SERVER-NAME,1433")
+    st.caption("Examples:")
+    st.code("192.168.1.100,1433")  # IP address with port
+    st.code("DESKTOP-ABC,1433")    # Computer name with port
+    st.code("localhost,1433")      # Local with port
+    
     server_name = st.text_input(
         "Enter Server Name",
         value=st.session_state.server_name,
-        help="Your SQL Server name with port (if needed)"
+        help="Enter IP address or server name with port number"
     )
     
     # Database name input
@@ -71,40 +59,54 @@ def render_db_form():
     username = st.text_input("Username", value=st.session_state.username)
     password = st.text_input("Password", type="password")
     
+    # Advanced Options
+    with st.expander("Advanced Connection Options"):
+        timeout = st.number_input("Login Timeout (seconds)", min_value=5, value=30)
+        encrypt = st.checkbox("Encrypt Connection", value=False)
+        trust_cert = st.checkbox("Trust Server Certificate", value=True)
+    
     # View Data button
     if st.button("View Database Data", use_container_width=True):
         try:
+            # Build connection string with timeout and encryption options
             conn_str = (
-                f'DRIVER={{{driver}}};'  # Use detected driver
+                f'DRIVER={{ODBC Driver 17 for SQL Server}};'
                 f'SERVER={server_name};'
                 f'DATABASE={database_name};'
                 f'UID={username};'
-                f'PWD={password}'
+                f'PWD={password};'
+                f'Connect Timeout={timeout};'
             )
             
+            if not encrypt:
+                conn_str += 'Encrypt=no;'
+            if trust_cert:
+                conn_str += 'TrustServerCertificate=yes;'
+            
             # Try to connect and fetch data
-            conn = pyodbc.connect(conn_str)
-            query = """
-                SELECT TOP 1000 
-                    AccNo,
-                    CompanyName,
-                    RegisterNo,
-                    Address1,
-                    Address2,
-                    Address3,
-                    Address4,
-                    PostCode,
-                    Phone1,
-                    Phone2,
-                    EmailAddress,
-                    WebURL,
-                    NatureOfBusiness,
-                    IsActive
-                FROM Debtor
-                ORDER BY CompanyName
-            """
-            df = pd.read_sql(query, conn)
-            conn.close()
+            with st.spinner("Connecting to database..."):
+                conn = pyodbc.connect(conn_str)
+                query = """
+                    SELECT TOP 1000 
+                        AccNo,
+                        CompanyName,
+                        RegisterNo,
+                        Address1,
+                        Address2,
+                        Address3,
+                        Address4,
+                        PostCode,
+                        Phone1,
+                        Phone2,
+                        EmailAddress,
+                        WebURL,
+                        NatureOfBusiness,
+                        IsActive
+                    FROM Debtor
+                    ORDER BY CompanyName
+                """
+                df = pd.read_sql(query, conn)
+                conn.close()
             
             # Save connection info
             st.session_state.server_name = server_name
@@ -128,11 +130,14 @@ def render_db_form():
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
             st.error("""
-            Common solutions:
-            1. Make sure SQL Server is running
-            2. Check server name and port
-            3. Verify username and password
-            4. Install SQL Server driver
+            Troubleshooting steps:
+            1. Check if you can ping the server IP
+            2. Verify the port number (default is 1433)
+            3. Make sure SQL Server is running on the remote machine
+            4. Check firewall settings on both machines
+            5. Verify SQL Server allows remote connections
+            6. Try increasing the timeout value
+            7. Try disabling encryption if using an older SQL Server
             """)
 
 def main():
