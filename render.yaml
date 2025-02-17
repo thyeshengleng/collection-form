@@ -3,7 +3,7 @@ services:
     name: collection-form-api
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:application --bind 0.0.0.0:$PORT --worker-class uvicorn.workers.UvicornWorker --workers 4
+    startCommand: gunicorn "api_server:app"
     envVars:
       - key: DB_SERVER
         value: DESKTOP-RMNV9QV\A2006
