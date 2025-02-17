@@ -16,79 +16,96 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Create connection string for SQL Server 2006
-            conn_str = (
-                'DRIVER={SQL Server};'
-                'SERVER=127.0.0.1\\A2006;'  # Use IP address
-                'DATABASE=AED_AssignmentOne;'
-                'UID=sa;'
-                'PWD=oCt2005-ShenZhou6_A2006;'
-            )
-            
-            # Try to connect and fetch data
-            with st.spinner("Connecting to database..."):
-                # First try to connect
-                st.info("Attempting to connect to SQL Server...")
-                conn = pyodbc.connect(conn_str, timeout=30)
-                
-                # If connected, fetch data
-                st.info("Connected! Fetching data...")
-                query = """
-                    SELECT TOP 1000 
-                        AccNo,
-                        CompanyName,
-                        RegisterNo,
-                        Address1,
-                        Address2,
-                        Address3,
-                        Address4,
-                        PostCode,
-                        Phone1,
-                        Phone2,
-                        EmailAddress,
-                        WebURL,
-                        NatureOfBusiness,
-                        IsActive
-                    FROM Debtor
-                    ORDER BY CompanyName
-                """
-                df = pd.read_sql(query, conn)
-                conn.close()
-            
-            # Display data
-            st.success("✅ Connected successfully! Showing database records:")
-            st.dataframe(
-                df,
-                hide_index=True,
-                use_container_width=True,
-                column_config={
-                    "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
-                    "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
-                    "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
-                    "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
+            # Try different connection strings
+            connection_attempts = [
+                # Attempt 1: Basic connection
+                {
+                    'desc': 'Basic connection',
+                    'conn_str': (
+                        'DRIVER={ODBC Driver 17 for SQL Server};'
+                        'SERVER=DESKTOP-RMNV9QV\\A2006;'
+                        'DATABASE=AED_AssignmentOne;'
+                        'UID=sa;'
+                        'PWD=oCt2005-ShenZhou6_A2006;'
+                    )
+                },
+                # Attempt 2: Local server
+                {
+                    'desc': 'Local server',
+                    'conn_str': (
+                        'DRIVER={ODBC Driver 17 for SQL Server};'
+                        'SERVER=.\\A2006;'
+                        'DATABASE=AED_AssignmentOne;'
+                        'UID=sa;'
+                        'PWD=oCt2005-ShenZhou6_A2006;'
+                    )
+                },
+                # Attempt 3: With TCP
+                {
+                    'desc': 'TCP connection',
+                    'conn_str': (
+                        'DRIVER={ODBC Driver 17 for SQL Server};'
+                        'SERVER=127.0.0.1,12345;'
+                        'DATABASE=AED_AssignmentOne;'
+                        'UID=sa;'
+                        'PWD=oCt2005-ShenZhou6_A2006;'
+                    )
                 }
-            )
+            ]
+            
+            # Try each connection string
+            for attempt in connection_attempts:
+                try:
+                    st.info(f"Trying {attempt['desc']}...")
+                    conn = pyodbc.connect(attempt['conn_str'], timeout=10)
+                    st.success(f"✅ Connected using {attempt['desc']}!")
+                    
+                    # If connected, fetch data
+                    query = """
+                        SELECT TOP 1000 
+                            AccNo,
+                            CompanyName,
+                            RegisterNo,
+                            Address1,
+                            Address2,
+                            Address3,
+                            Address4,
+                            PostCode,
+                            Phone1,
+                            Phone2,
+                            EmailAddress,
+                            WebURL,
+                            NatureOfBusiness,
+                            IsActive
+                        FROM Debtor
+                        ORDER BY CompanyName
+                    """
+                    df = pd.read_sql(query, conn)
+                    conn.close()
+                    
+                    # Display data
+                    st.success("Showing database records:")
+                    st.dataframe(
+                        df,
+                        hide_index=True,
+                        use_container_width=True,
+                        column_config={
+                            "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
+                            "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
+                            "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
+                            "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
+                        }
+                    )
+                    return
+                    
+                except Exception as e:
+                    st.warning(f"Failed {attempt['desc']}: {str(e)}")
+                    continue
+            
+            st.error("❌ All connection attempts failed")
             
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
-            st.error("""
-            Please check:
-            1. SQL Server instance name is correct (A2006)
-            2. SQL Server service is running
-            3. SQL Server Browser service is running
-            4. Windows Authentication is enabled
-            5. TCP/IP protocol is enabled
-            """)
-            
-            # Show available SQL Server drivers
-            try:
-                drivers = pyodbc.drivers()
-                st.info("Available SQL Server drivers:")
-                for driver in drivers:
-                    if 'SQL Server' in driver:
-                        st.code(driver)
-            except:
-                st.warning("Could not list available drivers")
 
 def main():
     # Initialize app configuration
