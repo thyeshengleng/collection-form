@@ -19,17 +19,21 @@ def render_db_form():
             # Create connection string for SQL Server 2006
             conn_str = (
                 'DRIVER={SQL Server};'
-                'SERVER=DESKTOP-RMNV9QV;'  # Try without instance name first
+                'SERVER=DESKTOP-RMNV9QV\\A2006;'  # Use instance name
                 'DATABASE=AED_AssignmentOne;'
                 'UID=sa;'
                 'PWD=oCt2005-ShenZhou6_A2006;'
-                'Network=DBMSSOCN;'  # Force TCP/IP
-                'Port=12345;'        # Specify port
+                'TrustServerCertificate=yes;'
             )
             
             # Try to connect and fetch data
             with st.spinner("Connecting to database..."):
-                conn = pyodbc.connect(conn_str)
+                # First try to connect
+                st.info("Attempting to connect to SQL Server...")
+                conn = pyodbc.connect(conn_str, timeout=30)
+                
+                # If connected, fetch data
+                st.info("Connected! Fetching data...")
                 query = """
                     SELECT TOP 1000 
                         AccNo,
@@ -70,11 +74,22 @@ def render_db_form():
             st.error(f"❌ Error: {str(e)}")
             st.error("""
             Please check:
-            1. SQL Server is running
-            2. TCP/IP is enabled in SQL Server Configuration Manager
-            3. Port 12345 is open in Windows Firewall
-            4. SQL Server Browser service is running
+            1. SQL Server instance name is correct (A2006)
+            2. SQL Server service is running
+            3. SQL Server Browser service is running
+            4. Windows Authentication is enabled
+            5. TCP/IP protocol is enabled
             """)
+            
+            # Show available SQL Server drivers
+            try:
+                drivers = pyodbc.drivers()
+                st.info("Available SQL Server drivers:")
+                for driver in drivers:
+                    if 'SQL Server' in driver:
+                        st.code(driver)
+            except:
+                st.warning("Could not list available drivers")
 
 def main():
     # Initialize app configuration
