@@ -14,13 +14,31 @@ import urllib.parse
 def render_db_form():
     st.subheader("Database Connection")
     
+    # Check if running on Streamlit Cloud
+    is_cloud = st.secrets.get("is_streamlit_cloud", False)
+    
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Create direct ODBC connection
+            if is_cloud:
+                st.error("""
+                ❌ Direct database connection is not available in cloud deployment.
+                
+                Options to fix this:
+                1. Set up a REST API endpoint
+                2. Use a cloud database
+                3. Set up a VPN connection
+                4. Use SSH tunneling
+                5. Deploy the app locally
+                
+                For now, please run the app locally to connect to your SQL Server.
+                """)
+                return
+            
+            # Local connection
             conn_str = (
                 'DRIVER={SQL Server};'
-                'SERVER=DESKTOP-RMNV9QV\A2006;'
+                'SERVER=DESKTOP-RMNV9QV\\A2006;'
                 'DATABASE=AED_AssignmentOne;'
                 'UID=sa;'
                 'PWD=oCt2005-ShenZhou6_A2006;'
@@ -30,8 +48,6 @@ def render_db_form():
             # Try to connect and fetch data
             with st.spinner("Connecting to database..."):
                 st.info("Testing connection...")
-                
-                # Connect using pyodbc
                 conn = pyodbc.connect(conn_str, timeout=30)
                 
                 # Fetch data
@@ -74,13 +90,14 @@ def render_db_form():
             
         except Exception as e:
             st.error(f"❌ Connection failed: {str(e)}")
-            st.error("""
-            Please check:
-            1. SQL Server is running
-            2. Server name is correct
-            3. Credentials are correct
-            4. SQL Server port is open
-            """)
+            if not is_cloud:
+                st.error("""
+                Please check:
+                1. SQL Server is running
+                2. Server name is correct
+                3. Credentials are correct
+                4. SQL Server port is open
+                """)
 
 def main():
     # Initialize app configuration
