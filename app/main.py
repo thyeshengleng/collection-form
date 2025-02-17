@@ -17,23 +17,22 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            base_url = "http://127.0.0.1:8001"
+            # Get API URL from secrets or use local URL
+            base_url = st.secrets.get("API_URL", "http://127.0.0.1:8001")
+            
+            st.info(f"Connecting to API at: {base_url}")  # Debug info
             
             # Check if API server is running
             try:
                 health_response = requests.get(f"{base_url}/health")
+                st.info(f"Health check response: {health_response.status_code}")  # Debug info
+                
                 if health_response.status_code != 200:
                     st.error("❌ API server is not responding correctly")
                     return
-            except requests.exceptions.ConnectionError:
-                st.error("""
-                ❌ Cannot connect to API server
-                
-                Please make sure:
-                1. Run 'python api_server.py' in a separate terminal
-                2. Wait for the message 'Uvicorn running on http://127.0.0.1:8001'
-                3. Try again
-                """)
+                    
+            except requests.exceptions.ConnectionError as e:
+                st.error(f"❌ Cannot connect to API server: {str(e)}")
                 return
             
             # Try to fetch data

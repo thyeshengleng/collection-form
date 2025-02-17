@@ -4,20 +4,19 @@ import pyodbc
 import pandas as pd
 import logging
 import os
+from mangum import Mangum
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+handler = Mangum(app)
 
 # Update CORS settings
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:8501",
-        "https://collection-form-u3uosjedoabyvvmr9pwfoa.streamlit.app"
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
