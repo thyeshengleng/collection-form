@@ -14,19 +14,10 @@ import urllib.parse
 def render_db_form():
     st.subheader("Database Connection")
     
-    # Check if running on Streamlit Cloud
-    is_cloud = st.secrets.get("is_streamlit_cloud", False)
-    
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Use different base URLs for cloud and local
-            if is_cloud:
-                # For cloud deployment
-                base_url = "https://collection-form-api.onrender.com"  # We'll deploy API to Render.com
-            else:
-                # For local development
-                base_url = "http://127.0.0.1:8001"
+            base_url = "http://127.0.0.1:8001"
             
             # Check if API server is running
             try:
@@ -35,24 +26,14 @@ def render_db_form():
                     st.error("❌ API server is not responding correctly")
                     return
             except requests.exceptions.ConnectionError:
-                if is_cloud:
-                    st.error("""
-                    ❌ Cannot connect to API server
-                    
-                    Please check:
-                    1. API is deployed and running
-                    2. API URL is correct
-                    3. Network connection is working
-                    """)
-                else:
-                    st.error("""
-                    ❌ Cannot connect to API server
-                    
-                    Please make sure:
-                    1. Run 'python api_server.py' in a separate terminal
-                    2. Wait for the message 'Uvicorn running on http://127.0.0.1:8001'
-                    3. Try again
-                    """)
+                st.error("""
+                ❌ Cannot connect to API server
+                
+                Please make sure:
+                1. Run 'python api_server.py' in a separate terminal
+                2. Wait for the message 'Uvicorn running on http://127.0.0.1:8001'
+                3. Try again
+                """)
                 return
             
             # Try to fetch data
