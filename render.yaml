@@ -3,11 +3,7 @@ services:
     name: collection-form-api
     env: python
     buildCommand: pip install -r requirements.txt
-<<<<<<< HEAD
-    startCommand: gunicorn "api_server:app"
-=======
     startCommand: uvicorn api_server:app --host 0.0.0.0 --port $PORT
->>>>>>> parent of 06309c9 (initial commit)
     envVars:
       - key: DB_SERVER
         value: DESKTOP-RMNV9QV\A2006
@@ -16,10 +12,6 @@ services:
       - key: DB_USER
         value: sa
       - key: DB_PASSWORD
-<<<<<<< HEAD
         value: oCt2005-ShenZhou6_A2006
     healthCheckPath: /health
     autoDeploy: true
-=======
-        value: oCt2005-ShenZhou6_A2006 
->>>>>>> parent of 06309c9 (initial commit)
