@@ -18,55 +18,17 @@ def render_db_form():
         st.session_state.server_name = ""
     if 'database_name' not in st.session_state:
         st.session_state.database_name = ""
+    if 'username' not in st.session_state:
+        st.session_state.username = ""
     
-    # Help text and examples
+    # Server input
     st.markdown("### Server Name")
-    
-    # Add button to find SQL Server instances
-    if st.button("🔍 Find SQL Server Instances", help="Click to find available SQL Server instances"):
-        try:
-            import subprocess
-            result = subprocess.run(['sqlcmd', '-L'], capture_output=True, text=True)
-            instances = result.stdout.strip().split('\n')
-            st.code(instances)
-            st.success("✅ Found SQL Server instances!")
-        except Exception as e:
-            st.error("❌ Could not find SQL Server instances. Make sure SQL Server is installed.")
-            server_options = [
-                "Select a server...",
-                ".",
-                ".\\SQLEXPRESS",
-                "localhost",
-                "localhost\\SQLEXPRESS",
-                "(local)",
-                "(local)\\SQLEXPRESS",
-                f"{os.environ['COMPUTERNAME']}\\SQLEXPRESS"  # Add computer name
-            ]
-            st.write("Try these common server names:")
-            for option in server_options[1:]:
-                st.code(option)
-    
-    # Add a server name selector
-    server_options = [
-        "Select a server...",
-        ".",  # Local server
-        "(local)",  # Local server
-        "localhost",  # Local server
-        f"{os.environ['COMPUTERNAME']}",  # Computer name
-        f"{os.environ['COMPUTERNAME']},1433"  # Computer name with port
-    ]
-    server_name = st.selectbox(
-        "Select or Enter Server Name",
-        options=server_options,
-        key="server_selector"
+    st.caption("Example: SERVER-NAME,1433")
+    server_name = st.text_input(
+        "Enter Server Name",
+        value=st.session_state.server_name,
+        help="Your SQL Server name with port (if needed)"
     )
-    
-    if server_name == "Select a server...":
-        server_name = st.text_input(
-            "Or enter custom server name",
-            value=st.session_state.server_name,
-            help="Your SQL Server instance name"
-        )
     
     # Database name input
     st.markdown("### Database Name")
@@ -77,110 +39,67 @@ def render_db_form():
         help="The name of your database"
     )
     
-    # Test connection button
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🔌 Test Connection", use_container_width=True):
-            try:
-                server = server_name.replace('\\', '\\\\')
-                conn_str = (
-                    f'DRIVER={{SQL Server}};'
-                    f'SERVER={server};'
-                    'Trusted_Connection=yes;'
-                    'Network=DBMSSOCN;'  # Add this for older SQL Server
-                )
-                conn = pyodbc.connect(conn_str)
-                conn.close()
-                st.success("✅ Connection successful!")
-            except Exception as e:
-                st.error(f"❌ Connection failed: {str(e)}")
+    # Authentication inputs
+    st.markdown("### Authentication")
+    username = st.text_input("Username", value=st.session_state.username)
+    password = st.text_input("Password", type="password")
     
     # View Data button
-    with col2:
-        if st.button("👁️ View Database Data", use_container_width=True):
-            try:
-                server = server_name.replace('\\', '\\\\')
-                conn_str = (
-                    f'DRIVER={{SQL Server}};'
-                    f'SERVER={server};'
-                    f'DATABASE={database_name};'
-                    'Trusted_Connection=yes;'
-                    'Network=DBMSSOCN;'  # Add this for older SQL Server
-                )
-                
-                # Try to connect and fetch data
-                conn = pyodbc.connect(conn_str)
-                query = """
-                    SELECT TOP 1000 
-                        AccNo,
-                        CompanyName,
-                        RegisterNo,
-                        Address1,
-                        Address2,
-                        Address3,
-                        Address4,
-                        PostCode,
-                        Phone1,
-                        Phone2,
-                        EmailAddress,
-                        WebURL,
-                        NatureOfBusiness,
-                        IsActive
-                    FROM Debtor
-                    ORDER BY CompanyName
-                """
-                df = pd.read_sql(query, conn)
-                conn.close()
-                
-                # Save connection info to session state
-                st.session_state.server_name = server_name
-                st.session_state.database_name = database_name
-                
-                # Display data in an interactive table
-                st.success("✅ Connected successfully! Showing database records:")
-                st.dataframe(
-                    df,
-                    hide_index=True,
-                    use_container_width=True,
-                    column_config={
-                        "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
-                        "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
-                        "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
-                        "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
-                    }
-                )
-                
-            except Exception as e:
-                st.error(f"❌ Error: {str(e)}")
-                st.error("""
-                Common solutions:
-                1. Check if SQL Server is running
-                2. Verify server name is correct
-                3. Make sure database exists
-                4. Enable TCP/IP in SQL Server Configuration Manager
-                """)
-
-    # Add troubleshooting info
-    with st.expander("🔧 SQL Server 2006 Troubleshooting"):
-        st.markdown("""
-        1. **Check SQL Server Services**:
-           - Open "Services" (services.msc)
-           - Make sure "SQL Server" is Running
-           - Make sure "SQL Server Browser" is Running
-        
-        2. **Common server names for SQL 2006**:
-           - `.` (local server)
-           - `(local)`
-           - `localhost`
-           - `COMPUTERNAME`
-           - `COMPUTERNAME,1433` (with port number)
-        
-        3. **Check SQL Server Configuration**:
-           - Make sure SQL Server is running
-           - Enable TCP/IP protocol
-           - Default port is 1433
-           - Try using IP address if server name doesn't work
-        """)
+    if st.button("View Database Data", use_container_width=True):
+        try:
+            conn_str = (
+                f'DRIVER={{SQL Server}};'
+                f'SERVER={server_name};'
+                f'DATABASE={database_name};'
+                f'UID={username};'
+                f'PWD={password}'
+            )
+            
+            # Try to connect and fetch data
+            conn = pyodbc.connect(conn_str)
+            query = """
+                SELECT TOP 1000 
+                    AccNo,
+                    CompanyName,
+                    RegisterNo,
+                    Address1,
+                    Address2,
+                    Address3,
+                    Address4,
+                    PostCode,
+                    Phone1,
+                    Phone2,
+                    EmailAddress,
+                    WebURL,
+                    NatureOfBusiness,
+                    IsActive
+                FROM Debtor
+                ORDER BY CompanyName
+            """
+            df = pd.read_sql(query, conn)
+            conn.close()
+            
+            # Save connection info
+            st.session_state.server_name = server_name
+            st.session_state.database_name = database_name
+            st.session_state.username = username
+            
+            # Display data
+            st.success("✅ Connected successfully! Showing database records:")
+            st.dataframe(
+                df,
+                hide_index=True,
+                use_container_width=True,
+                column_config={
+                    "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
+                    "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
+                    "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
+                    "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
+                }
+            )
+            
+        except Exception as e:
+            st.error(f"❌ Error: {str(e)}")
 
 def main():
     # Initialize app configuration
