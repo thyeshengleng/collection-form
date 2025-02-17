@@ -33,7 +33,7 @@ def render_db_form():
             # Hardcoded connection details for SQL Server 2006
             conn_str = (
                 'DRIVER={SQL Server};'  # Old SQL Server driver
-                'SERVER=DESKTOP-RMNV9QV\\A2006;'
+                'SERVER=DESKTOP-RMNV9QV,12345;'  # Using port 12345
                 'DATABASE=AED_AssignmentOne;'
                 'UID=sa;'
                 'PWD=oCt2005-ShenZhou6_A2006;'
