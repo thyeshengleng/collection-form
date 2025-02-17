@@ -30,19 +30,13 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Get connection details from environment variables
-            server = os.getenv('DB_SERVER')
-            database = os.getenv('DB_NAME')
-            username = os.getenv('DB_USER')
-            password = os.getenv('DB_PASSWORD')
-            driver = os.getenv('DB_DRIVER')
-            
+            # Hardcoded connection details for SQL Server 2006
             conn_str = (
-                f'DRIVER={{{driver}}};'
-                f'SERVER={server};'
-                f'DATABASE={database};'
-                f'UID={username};'
-                f'PWD={password}'
+                'DRIVER={SQL Server};'  # Old SQL Server driver
+                'SERVER=DESKTOP-RMNV9QV\\A2006;'
+                'DATABASE=AED_AssignmentOne;'
+                'UID=sa;'
+                'PWD=oCt2005-ShenZhou6_A2006;'
             )
             
             # Try to connect and fetch data
