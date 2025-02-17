@@ -14,90 +14,45 @@ import urllib.parse
 def render_db_form():
     st.subheader("Database Connection")
     
-    # Check if running on Streamlit Cloud
-    is_cloud = st.secrets.get("is_streamlit_cloud", False)
-    
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            if is_cloud:
-                st.error("""
-                ❌ Direct database connection is not available in cloud deployment.
-                
-                Options to fix this:
-                1. Set up a REST API endpoint
-                2. Use a cloud database
-                3. Set up a VPN connection
-                4. Use SSH tunneling
-                5. Deploy the app locally
-                
-                For now, please run the app locally to connect to your SQL Server.
-                """)
-                return
+            # API endpoint
+            api_url = "http://localhost:8000/api/debtor"
             
-            # Local connection
-            conn_str = (
-                'DRIVER={SQL Server};'
-                'SERVER=DESKTOP-RMNV9QV\\A2006;'
-                'DATABASE=AED_AssignmentOne;'
-                'UID=sa;'
-                'PWD=oCt2005-ShenZhou6_A2006;'
-                'Trusted_Connection=no;'
-            )
-            
-            # Try to connect and fetch data
-            with st.spinner("Connecting to database..."):
-                st.info("Testing connection...")
-                conn = pyodbc.connect(conn_str, timeout=30)
+            # Try to fetch data
+            with st.spinner("Fetching data..."):
+                response = requests.get(api_url)
                 
-                # Fetch data
-                st.info("Fetching data...")
-                query = """
-                    SELECT TOP 1000 
-                        AccNo,
-                        CompanyName,
-                        RegisterNo,
-                        Address1,
-                        Address2,
-                        Address3,
-                        Address4,
-                        PostCode,
-                        Phone1,
-                        Phone2,
-                        EmailAddress,
-                        WebURL,
-                        NatureOfBusiness,
-                        IsActive
-                    FROM Debtor
-                    ORDER BY CompanyName
-                """
-                df = pd.read_sql(query, conn)
-                conn.close()
-                
-                # Display data
-                st.success("✅ Data retrieved successfully!")
-                st.dataframe(
-                    df,
-                    hide_index=True,
-                    use_container_width=True,
-                    column_config={
-                        "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
-                        "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
-                        "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
-                        "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
-                    }
-                )
+                if response.status_code == 200:
+                    # Convert JSON to DataFrame
+                    data = response.json()
+                    df = pd.DataFrame(data)
+                    
+                    # Display data
+                    st.success("✅ Data retrieved successfully!")
+                    st.dataframe(
+                        df,
+                        hide_index=True,
+                        use_container_width=True,
+                        column_config={
+                            "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
+                            "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
+                            "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
+                            "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
+                        }
+                    )
+                else:
+                    st.error(f"❌ API Error: {response.text}")
             
         except Exception as e:
             st.error(f"❌ Connection failed: {str(e)}")
-            if not is_cloud:
-                st.error("""
-                Please check:
-                1. SQL Server is running
-                2. Server name is correct
-                3. Credentials are correct
-                4. SQL Server port is open
-                """)
+            st.error("""
+            Please check:
+            1. API server is running (python api_server.py)
+            2. API endpoint is correct
+            3. Network connection is working
+            """)
 
 def main():
     # Initialize app configuration
