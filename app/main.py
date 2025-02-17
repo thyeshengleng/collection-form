@@ -17,33 +17,45 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Get database credentials from secrets
-            server = st.secrets.get("DB_SERVER", "DESKTOP-RMNV9QV\\A2006")
-            database = st.secrets.get("DB_NAME", "AED_AssignmentOne")
-            username = st.secrets.get("DB_USER", "sa")
-            password = st.secrets.get("DB_PASSWORD", "oCt2005-ShenZhou6_A2006")
+            # Use cloud database for production
+            is_cloud = st.secrets.get("is_streamlit_cloud", False)
             
-            # Create connection string
-            params = urllib.parse.quote_plus(
-                'DRIVER={ODBC Driver 17 for SQL Server};'
-                f'SERVER={server};'
-                f'DATABASE={database};'
-                f'UID={username};'
-                f'PWD={password};'
-                'Encrypt=yes;'
-                'TrustServerCertificate=no;'
-            )
+            if is_cloud:
+                # Azure SQL Database connection
+                params = urllib.parse.quote_plus(
+                    'DRIVER={ODBC Driver 17 for SQL Server};'
+                    'SERVER=your-azure-server.database.windows.net;'
+                    'DATABASE=your-database;'
+                    'UID=your-username;'
+                    'PWD=your-password;'
+                    'Encrypt=yes;'
+                    'TrustServerCertificate=no;'
+                )
+            else:
+                # Local database connection
+                params = urllib.parse.quote_plus(
+                    'DRIVER={ODBC Driver 17 for SQL Server};'
+                    'SERVER=DESKTOP-RMNV9QV\\A2006;'
+                    'DATABASE=AED_AssignmentOne;'
+                    'UID=sa;'
+                    'PWD=oCt2005-ShenZhou6_A2006;'
+                    'Trusted_Connection=no;'
+                )
             
             # Create SQLAlchemy engine
             engine = create_engine(
                 f"mssql+pyodbc:///?odbc_connect={params}",
-                pool_pre_ping=True,
-                pool_recycle=3600
+                pool_pre_ping=True,  # Check connection before using
+                pool_recycle=3600    # Recycle connections after 1 hour
             )
             
             # Try to connect and fetch data
             with st.spinner("Connecting to database..."):
+                st.info("Attempting to connect to SQL Server...")
+                
+                # Test connection first
                 with engine.connect() as conn:
+                    st.info("Connected! Fetching data...")
                     query = """
                         SELECT TOP 1000 
                             AccNo,
@@ -64,29 +76,30 @@ def render_db_form():
                         ORDER BY CompanyName
                     """
                     df = pd.read_sql(query, conn)
-                    
-                    # Display data
-                    st.success("✅ Data retrieved successfully!")
-                    st.dataframe(
-                        df,
-                        hide_index=True,
-                        use_container_width=True,
-                        column_config={
-                            "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
-                            "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
-                            "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
-                            "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
-                        }
-                    )
+                
+                # Display data
+                st.success("✅ Connected successfully! Showing database records:")
+                st.dataframe(
+                    df,
+                    hide_index=True,
+                    use_container_width=True,
+                    column_config={
+                        "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
+                        "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
+                        "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
+                        "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
+                    }
+                )
             
         except Exception as e:
-            st.error(f"❌ Database Error: {str(e)}")
+            st.error(f"❌ Error: {str(e)}")
             st.error("""
             Please check:
-            1. Database credentials are correct
-            2. Database server is accessible
-            3. Firewall rules allow connection
-            4. Network connection is working
+            1. SQL Server instance name is correct (A2006)
+            2. SQL Server service is running
+            3. SQL Server Browser service is running
+            4. Windows Authentication is enabled
+            5. TCP/IP protocol is enabled
             """)
 
 def main():
