@@ -24,64 +24,19 @@ def get_sql_driver():
 def render_db_form():
     st.subheader("Database Connection")
     
-    # Initialize session state
-    if 'server_name' not in st.session_state:
-        st.session_state.server_name = ""
-    if 'database_name' not in st.session_state:
-        st.session_state.database_name = ""
-    if 'username' not in st.session_state:
-        st.session_state.username = ""
-    
-    # Server input with examples
-    st.markdown("### Server Name")
-    st.caption("Examples:")
-    st.code("192.168.1.100,1433")  # IP address with port
-    st.code("DESKTOP-ABC,1433")    # Computer name with port
-    st.code("localhost,1433")      # Local with port
-    
-    server_name = st.text_input(
-        "Enter Server Name",
-        value=st.session_state.server_name,
-        help="Enter IP address or server name with port number"
-    )
-    
-    # Database name input
-    st.markdown("### Database Name")
-    database_name = st.text_input(
-        "Enter Database Name",
-        value=st.session_state.database_name,
-        placeholder="e.g., AED_AssignmentOne",
-        help="The name of your database"
-    )
-    
-    # Authentication inputs
-    st.markdown("### Authentication")
-    username = st.text_input("Username", value=st.session_state.username)
-    password = st.text_input("Password", type="password")
-    
-    # Advanced Options
-    with st.expander("Advanced Connection Options"):
-        timeout = st.number_input("Login Timeout (seconds)", min_value=5, value=30)
-        encrypt = st.checkbox("Encrypt Connection", value=False)
-        trust_cert = st.checkbox("Trust Server Certificate", value=True)
-    
     # View Data button
-    if st.button("View Database Data", use_container_width=True):
+    if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Build connection string with timeout and encryption options
+            # Use hardcoded connection details
             conn_str = (
-                f'DRIVER={{ODBC Driver 17 for SQL Server}};'
-                f'SERVER={server_name};'
-                f'DATABASE={database_name};'
-                f'UID={username};'
-                f'PWD={password};'
-                f'Connect Timeout={timeout};'
+                'DRIVER={SQL Server};'
+                'SERVER=YOUR_SERVER,1433;'  # Replace with your server
+                'DATABASE=AED_AssignmentOne;'
+                'UID=YOUR_USERNAME;'        # Replace with your username
+                'PWD=YOUR_PASSWORD;'        # Replace with your password
+                'Connect Timeout=30;'
+                'Encrypt=no;'
             )
-            
-            if not encrypt:
-                conn_str += 'Encrypt=no;'
-            if trust_cert:
-                conn_str += 'TrustServerCertificate=yes;'
             
             # Try to connect and fetch data
             with st.spinner("Connecting to database..."):
@@ -108,11 +63,6 @@ def render_db_form():
                 df = pd.read_sql(query, conn)
                 conn.close()
             
-            # Save connection info
-            st.session_state.server_name = server_name
-            st.session_state.database_name = database_name
-            st.session_state.username = username
-            
             # Display data
             st.success("✅ Connected successfully! Showing database records:")
             st.dataframe(
@@ -129,16 +79,6 @@ def render_db_form():
             
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
-            st.error("""
-            Troubleshooting steps:
-            1. Check if you can ping the server IP
-            2. Verify the port number (default is 1433)
-            3. Make sure SQL Server is running on the remote machine
-            4. Check firewall settings on both machines
-            5. Verify SQL Server allows remote connections
-            6. Try increasing the timeout value
-            7. Try disabling encryption if using an older SQL Server
-            """)
 
 def main():
     # Initialize app configuration
