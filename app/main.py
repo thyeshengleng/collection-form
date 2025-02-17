@@ -30,11 +30,11 @@ def render_db_form():
             # Use hardcoded connection details for SQL Server 2006
             conn_str = (
                 'DRIVER={SQL Server};'
-                'SERVER=192.168.1.100;'  # Replace with your server IP
+                'SERVER=DESKTOP-RMNV9QV\A2006;'  # Replace with your server IP
                 'PORT=1433;'             # SQL Server port
                 'DATABASE=AED_AssignmentOne;'
                 'UID=sa;'                # Replace with your username
-                'PWD=password123;'       # Replace with your password
+                'PWD=oCt2005-ShenZhou6_A2006;'       # Replace with your password
             )
             
             # Try to connect and fetch data
