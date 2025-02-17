@@ -10,6 +10,17 @@ from app.components.table import render_records_table
 from app.components.edit_form import render_edit_form
 import os
 
+def get_sql_driver():
+    """Try to find an available SQL Server driver"""
+    try:
+        import pyodbc
+        drivers = [x for x in pyodbc.drivers() if 'SQL Server' in x]
+        if drivers:
+            return drivers[0]
+        return None
+    except:
+        return None
+
 def render_db_form():
     st.subheader("Database Connection")
     
@@ -20,6 +31,22 @@ def render_db_form():
         st.session_state.database_name = ""
     if 'username' not in st.session_state:
         st.session_state.username = ""
+    
+    # Check SQL Driver
+    driver = get_sql_driver()
+    if not driver:
+        st.error("""
+        ❌ No SQL Server driver found. Please install one of these:
+        1. ODBC Driver for SQL Server
+        2. FreeTDS
+        3. UnixODBC
+        
+        Installation commands:
+        - Ubuntu/Debian: `sudo apt-get install unixodbc unixodbc-dev freetds-dev freetds-bin tdsodbc`
+        - macOS: `brew install unixodbc freetds`
+        - Windows: Install "Microsoft ODBC Driver for SQL Server" from Microsoft's website
+        """)
+        return
     
     # Server input
     st.markdown("### Server Name")
@@ -48,7 +75,7 @@ def render_db_form():
     if st.button("View Database Data", use_container_width=True):
         try:
             conn_str = (
-                f'DRIVER={{SQL Server}};'
+                f'DRIVER={{{driver}}};'  # Use detected driver
                 f'SERVER={server_name};'
                 f'DATABASE={database_name};'
                 f'UID={username};'
@@ -100,6 +127,13 @@ def render_db_form():
             
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
+            st.error("""
+            Common solutions:
+            1. Make sure SQL Server is running
+            2. Check server name and port
+            3. Verify username and password
+            4. Install SQL Server driver
+            """)
 
 def main():
     # Initialize app configuration
