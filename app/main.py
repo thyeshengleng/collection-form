@@ -14,12 +14,12 @@ import urllib.parse
 def render_db_form():
     st.subheader("Database Connection")
     
+    # Get API URL from secrets
+    base_url = st.secrets.get("API_URL", "https://your-api-name.herokuapp.com")
+    
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Use cloud API URL instead of localhost
-            base_url = "https://your-api-url.herokuapp.com"  # Replace with your deployed API URL
-            
             # Check if API server is running
             try:
                 health_response = requests.get(f"{base_url}/health")

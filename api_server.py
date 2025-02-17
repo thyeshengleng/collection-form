@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import pyodbc
 import pandas as pd
 import logging
+import os
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -21,12 +22,18 @@ app.add_middleware(
 
 def get_db_connection():
     try:
+        # Get database credentials from environment variables
+        server = os.getenv('DB_SERVER', 'DESKTOP-RMNV9QV\\A2006')
+        database = os.getenv('DB_NAME', 'AED_AssignmentOne')
+        username = os.getenv('DB_USER', 'sa')
+        password = os.getenv('DB_PASSWORD', 'oCt2005-ShenZhou6_A2006')
+        
         conn_str = (
             'DRIVER={SQL Server};'
-            'SERVER=DESKTOP-RMNV9QV\\A2006;'
-            'DATABASE=AED_AssignmentOne;'
-            'UID=sa;'
-            'PWD=oCt2005-ShenZhou6_A2006;'
+            f'SERVER={server};'
+            f'DATABASE={database};'
+            f'UID={username};'
+            f'PWD={password};'
             'Trusted_Connection=no;'
         )
         logger.info("Attempting database connection...")
@@ -36,6 +43,14 @@ def get_db_connection():
     except Exception as e:
         logger.error(f"Database connection failed: {str(e)}")
         raise
+
+@app.get("/")
+async def root():
+    return {"message": "API is running"}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
 
 @app.get("/api/debtor")
 async def get_debtors():
@@ -66,18 +81,14 @@ async def get_debtors():
         conn.close()
         logger.info(f"Query returned {len(df)} rows")
         
-        # Convert DataFrame to JSON
         return df.to_dict(orient='records')
         
     except Exception as e:
         logger.error(f"Error in get_debtors: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
-
 if __name__ == "__main__":
     import uvicorn
-    logger.info("Starting FastAPI server...")
-    uvicorn.run(app, host="127.0.0.1", port=8001, log_level="info") 
+    port = int(os.getenv('PORT', 8001))
+    logger.info(f"Starting FastAPI server on port {port}...")
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info") 
