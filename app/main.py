@@ -19,11 +19,10 @@ def render_db_form():
             # Create connection string for SQL Server 2006
             conn_str = (
                 'DRIVER={SQL Server};'
-                'SERVER=DESKTOP-RMNV9QV\\A2006;'  # Use instance name
+                'SERVER=127.0.0.1\\A2006;'  # Use IP address
                 'DATABASE=AED_AssignmentOne;'
                 'UID=sa;'
                 'PWD=oCt2005-ShenZhou6_A2006;'
-                'TrustServerCertificate=yes;'
             )
             
             # Try to connect and fetch data
