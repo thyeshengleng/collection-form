@@ -31,11 +31,11 @@ def render_db_form():
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
             # Get connection details from environment variables
-            server = os.getenv('DB_SERVER', 'DESKTOP-RMNV9QV\\A2006')
-            database = os.getenv('DB_NAME', 'AED_AssignmentOne')
-            username = os.getenv('DB_USER', 'sa')
-            password = os.getenv('DB_PASSWORD', 'oCt2005-ShenZhou6_A2006')
-            driver = os.getenv('DB_DRIVER', 'SQL Server')
+            server = os.getenv('DB_SERVER')
+            database = os.getenv('DB_NAME')
+            username = os.getenv('DB_USER')
+            password = os.getenv('DB_PASSWORD')
+            driver = os.getenv('DB_DRIVER')
             
             conn_str = (
                 f'DRIVER={{{driver}}};'
@@ -45,20 +45,33 @@ def render_db_form():
                 f'PWD={password}'
             )
             
-            # Use API endpoint instead of direct SQL connection
-            api_url = "https://your-api-endpoint.com/api/debtor"  # Replace with your API URL
-            
-            # Try to fetch data
-            with st.spinner("Fetching data..."):
-                response = requests.get(api_url)
-                if response.status_code == 200:
-                    data = response.json()
-                    df = pd.DataFrame(data)
-                else:
-                    raise Exception(f"API returned status code {response.status_code}")
+            # Try to connect and fetch data
+            with st.spinner("Connecting to database..."):
+                conn = pyodbc.connect(conn_str)
+                query = """
+                    SELECT TOP 1000 
+                        AccNo,
+                        CompanyName,
+                        RegisterNo,
+                        Address1,
+                        Address2,
+                        Address3,
+                        Address4,
+                        PostCode,
+                        Phone1,
+                        Phone2,
+                        EmailAddress,
+                        WebURL,
+                        NatureOfBusiness,
+                        IsActive
+                    FROM Debtor
+                    ORDER BY CompanyName
+                """
+                df = pd.read_sql(query, conn)
+                conn.close()
             
             # Display data
-            st.success("✅ Data loaded successfully!")
+            st.success("✅ Connected successfully! Showing database records:")
             st.dataframe(
                 df,
                 hide_index=True,
