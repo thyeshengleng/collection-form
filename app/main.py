@@ -17,8 +17,8 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Create direct ODBC connection
-            conn_str = (
+            # Create SQLAlchemy connection string
+            params = urllib.parse.quote_plus(
                 'DRIVER={ODBC Driver 17 for SQL Server};'
                 'SERVER=DESKTOP-RMNV9QV\\A2006;'
                 'DATABASE=AED_AssignmentOne;'
@@ -27,34 +27,40 @@ def render_db_form():
                 'Trusted_Connection=no;'
             )
             
+            # Create SQLAlchemy engine
+            engine = create_engine(
+                f"mssql+pyodbc:///?odbc_connect={params}",
+                pool_pre_ping=True,  # Check connection before using
+                pool_recycle=3600    # Recycle connections after 1 hour
+            )
+            
             # Try to connect and fetch data
             with st.spinner("Connecting to database..."):
                 st.info("Attempting to connect to SQL Server...")
-                conn = pyodbc.connect(conn_str, timeout=30)
                 
-                # If connected, fetch data
-                st.info("Connected! Fetching data...")
-                query = """
-                    SELECT TOP 1000 
-                        AccNo,
-                        CompanyName,
-                        RegisterNo,
-                        Address1,
-                        Address2,
-                        Address3,
-                        Address4,
-                        PostCode,
-                        Phone1,
-                        Phone2,
-                        EmailAddress,
-                        WebURL,
-                        NatureOfBusiness,
-                        IsActive
-                    FROM Debtor
-                    ORDER BY CompanyName
-                """
-                df = pd.read_sql(query, conn)
-                conn.close()
+                # Test connection first
+                with engine.connect() as conn:
+                    st.info("Connected! Fetching data...")
+                    query = """
+                        SELECT TOP 1000 
+                            AccNo,
+                            CompanyName,
+                            RegisterNo,
+                            Address1,
+                            Address2,
+                            Address3,
+                            Address4,
+                            PostCode,
+                            Phone1,
+                            Phone2,
+                            EmailAddress,
+                            WebURL,
+                            NatureOfBusiness,
+                            IsActive
+                        FROM Debtor
+                        ORDER BY CompanyName
+                    """
+                    df = pd.read_sql(query, conn)
                 
                 # Display data
                 st.success("✅ Connected successfully! Showing database records:")
