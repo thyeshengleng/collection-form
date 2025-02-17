@@ -17,7 +17,8 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            base_url = "http://127.0.0.1:8001"
+            # Use cloud API URL instead of localhost
+            base_url = "https://your-api-url.herokuapp.com"  # Replace with your deployed API URL
             
             # Check if API server is running
             try:
@@ -29,10 +30,10 @@ def render_db_form():
                 st.error("""
                 ❌ Cannot connect to API server
                 
-                Please make sure:
-                1. Run 'python api_server.py' in a separate terminal
-                2. Wait for the message 'Uvicorn running on http://127.0.0.1:8001'
-                3. Try again
+                Please check:
+                1. API server is deployed and running
+                2. API URL is correct
+                3. Network connection is working
                 """)
                 return
             
