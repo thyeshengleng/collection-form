@@ -25,19 +25,18 @@ app.add_middleware(
 def get_db_connection():
     try:
         # Get database credentials from environment variables
-        server = os.getenv('DB_SERVER', 'your-azure-server.database.windows.net')
+        server = os.getenv('DB_SERVER', 'DESKTOP-RMNV9QV\\A2006')
         database = os.getenv('DB_NAME', 'AED_AssignmentOne')
-        username = os.getenv('DB_USER', 'your-username')
-        password = os.getenv('DB_PASSWORD', 'your-password')
+        username = os.getenv('DB_USER', 'sa')
+        password = os.getenv('DB_PASSWORD', 'oCt2005-ShenZhou6_A2006')
         
         conn_str = (
-            'DRIVER={ODBC Driver 17 for SQL Server};'
+            'DRIVER={SQL Server};'
             f'SERVER={server};'
             f'DATABASE={database};'
             f'UID={username};'
             f'PWD={password};'
-            'Encrypt=yes;'
-            'TrustServerCertificate=no;'
+            'Trusted_Connection=no;'
         )
         logger.info("Attempting database connection...")
         conn = pyodbc.connect(conn_str)
@@ -59,16 +58,7 @@ async def health_check():
 async def get_debtors():
     try:
         logger.info("API endpoint called: /api/debtor")
-        try:
-            conn = get_db_connection()
-            logger.info("Database connection successful")
-        except Exception as db_error:
-            logger.error(f"Database connection failed: {str(db_error)}")
-            raise HTTPException(
-                status_code=500, 
-                detail=f"Database connection failed: {str(db_error)}"
-            )
-
+        conn = get_db_connection()
         query = """
             SELECT TOP 1000 
                 AccNo,
@@ -88,19 +78,13 @@ async def get_debtors():
             FROM Debtor
             ORDER BY CompanyName
         """
-        try:
-            logger.info("Executing SQL query...")
-            df = pd.read_sql(query, conn)
-            conn.close()
-            logger.info(f"Query returned {len(df)} rows")
-            return df.to_dict(orient='records')
-        except Exception as query_error:
-            logger.error(f"Query execution failed: {str(query_error)}")
-            raise HTTPException(
-                status_code=500,
-                detail=f"Query execution failed: {str(query_error)}"
-            )
-            
+        logger.info("Executing SQL query...")
+        df = pd.read_sql(query, conn)
+        conn.close()
+        logger.info(f"Query returned {len(df)} rows")
+        
+        return df.to_dict(orient='records')
+        
     except Exception as e:
         logger.error(f"Error in get_debtors: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
