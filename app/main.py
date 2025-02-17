@@ -16,96 +16,66 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Try different connection strings
-            connection_attempts = [
-                # Attempt 1: Basic connection
-                {
-                    'desc': 'Basic connection',
-                    'conn_str': (
-                        'DRIVER={ODBC Driver 17 for SQL Server};'
-                        'SERVER=DESKTOP-RMNV9QV\\A2006;'
-                        'DATABASE=AED_AssignmentOne;'
-                        'UID=sa;'
-                        'PWD=oCt2005-ShenZhou6_A2006;'
-                    )
-                },
-                # Attempt 2: Local server
-                {
-                    'desc': 'Local server',
-                    'conn_str': (
-                        'DRIVER={ODBC Driver 17 for SQL Server};'
-                        'SERVER=.\\A2006;'
-                        'DATABASE=AED_AssignmentOne;'
-                        'UID=sa;'
-                        'PWD=oCt2005-ShenZhou6_A2006;'
-                    )
-                },
-                # Attempt 3: With TCP
-                {
-                    'desc': 'TCP connection',
-                    'conn_str': (
-                        'DRIVER={ODBC Driver 17 for SQL Server};'
-                        'SERVER=127.0.0.1,12345;'
-                        'DATABASE=AED_AssignmentOne;'
-                        'UID=sa;'
-                        'PWD=oCt2005-ShenZhou6_A2006;'
-                    )
-                }
-            ]
+            # Connection parameters
+            server = "DESKTOP-RMNV9QV\\A2006"
+            database = "AED_AssignmentOne"
+            username = "sa"
+            password = "oCt2005-ShenZhou6_A2006"
             
-            # Try each connection string
-            for attempt in connection_attempts:
-                try:
-                    st.info(f"Trying {attempt['desc']}...")
-                    conn = pyodbc.connect(attempt['conn_str'], timeout=10)
-                    st.success(f"✅ Connected using {attempt['desc']}!")
-                    
-                    # If connected, fetch data
-                    query = """
-                        SELECT TOP 1000 
-                            AccNo,
-                            CompanyName,
-                            RegisterNo,
-                            Address1,
-                            Address2,
-                            Address3,
-                            Address4,
-                            PostCode,
-                            Phone1,
-                            Phone2,
-                            EmailAddress,
-                            WebURL,
-                            NatureOfBusiness,
-                            IsActive
-                        FROM Debtor
-                        ORDER BY CompanyName
-                    """
-                    df = pd.read_sql(query, conn)
-                    conn.close()
-                    
-                    # Display data
-                    st.success("Showing database records:")
-                    st.dataframe(
-                        df,
-                        hide_index=True,
-                        use_container_width=True,
-                        column_config={
-                            "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
-                            "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
-                            "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
-                            "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
-                        }
-                    )
-                    return
-                    
-                except Exception as e:
-                    st.warning(f"Failed {attempt['desc']}: {str(e)}")
-                    continue
+            # Create SQLAlchemy engine
+            connection_url = f"mssql+pyodbc://{username}:{password}@{server}/{database}?driver=ODBC+Driver+17+for+SQL+Server"
+            engine = create_engine(connection_url)
             
-            st.error("❌ All connection attempts failed")
+            # Try to connect and fetch data
+            with st.spinner("Connecting to database..."):
+                st.info("Attempting to connect to SQL Server...")
+                
+                # Use SQLAlchemy to query data
+                query = """
+                    SELECT TOP 1000 
+                        AccNo,
+                        CompanyName,
+                        RegisterNo,
+                        Address1,
+                        Address2,
+                        Address3,
+                        Address4,
+                        PostCode,
+                        Phone1,
+                        Phone2,
+                        EmailAddress,
+                        WebURL,
+                        NatureOfBusiness,
+                        IsActive
+                    FROM Debtor
+                    ORDER BY CompanyName
+                """
+                # Use pandas with SQLAlchemy engine
+                df = pd.read_sql(query, engine)
+                
+                # Display data
+                st.success("✅ Connected successfully! Showing database records:")
+                st.dataframe(
+                    df,
+                    hide_index=True,
+                    use_container_width=True,
+                    column_config={
+                        "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
+                        "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
+                        "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
+                        "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
+                    }
+                )
             
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
+            st.error("""
+            Please check:
+            1. SQL Server is running
+            2. Server name is correct
+            3. Credentials are correct
+            4. ODBC Driver 17 is installed
+            """)
 
 def main():
     # Initialize app configuration
