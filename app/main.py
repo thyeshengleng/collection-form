@@ -19,7 +19,7 @@ def render_db_form():
         try:
             # Create direct ODBC connection
             conn_str = (
-                'DRIVER={SQL Server};'
+                'DRIVER={ODBC Driver 17 for SQL Server};'
                 'SERVER=DESKTOP-RMNV9QV\\A2006;'
                 'DATABASE=AED_AssignmentOne;'
                 'UID=sa;'
