@@ -17,30 +17,15 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Use cloud database for production
-            is_cloud = st.secrets.get("is_streamlit_cloud", False)
-            
-            if is_cloud:
-                # Azure SQL Database connection
-                params = urllib.parse.quote_plus(
-                    'DRIVER={ODBC Driver 17 for SQL Server};'
-                    'SERVER=your-azure-server.database.windows.net;'
-                    'DATABASE=your-database;'
-                    'UID=your-username;'
-                    'PWD=your-password;'
-                    'Encrypt=yes;'
-                    'TrustServerCertificate=no;'
-                )
-            else:
-                # Local database connection
-                params = urllib.parse.quote_plus(
-                    'DRIVER={ODBC Driver 17 for SQL Server};'
-                    'SERVER=DESKTOP-RMNV9QV\\A2006;'
-                    'DATABASE=AED_AssignmentOne;'
-                    'UID=sa;'
-                    'PWD=oCt2005-ShenZhou6_A2006;'
-                    'Trusted_Connection=no;'
-                )
+            # Create SQLAlchemy connection string
+            params = urllib.parse.quote_plus(
+                'DRIVER={ODBC Driver 17 for SQL Server};'
+                'SERVER=DESKTOP-RMNV9QV\\A2006;'
+                'DATABASE=AED_AssignmentOne;'
+                'UID=sa;'
+                'PWD=oCt2005-ShenZhou6_A2006;'
+                'Trusted_Connection=no;'
+            )
             
             # Create SQLAlchemy engine
             engine = create_engine(
