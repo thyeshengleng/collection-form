@@ -17,50 +17,69 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Get API URL from secrets or use local URL
-            base_url = st.secrets.get("API_URL", "http://127.0.0.1:8001")
+            # Create direct ODBC connection
+            conn_str = (
+                'DRIVER={SQL Server};'
+                'SERVER=DESKTOP-RMNV9QV\\A2006;'
+                'DATABASE=AED_AssignmentOne;'
+                'UID=sa;'
+                'PWD=oCt2005-ShenZhou6_A2006;'
+                'Trusted_Connection=no;'
+            )
             
-            st.info(f"Connecting to API at: {base_url}")  # Debug info
-            
-            # Check if API server is running
-            try:
-                health_response = requests.get(f"{base_url}/health")
-                st.info(f"Health check response: {health_response.status_code}")  # Debug info
+            # Try to connect and fetch data
+            with st.spinner("Connecting to database..."):
+                st.info("Attempting to connect to SQL Server...")
+                conn = pyodbc.connect(conn_str, timeout=30)
                 
-                if health_response.status_code != 200:
-                    st.error("❌ API server is not responding correctly")
-                    return
-                    
-            except requests.exceptions.ConnectionError as e:
-                st.error(f"❌ Cannot connect to API server: {str(e)}")
-                return
-            
-            # Try to fetch data
-            with st.spinner("Fetching data..."):
-                response = requests.get(f"{base_url}/api/debtor")
+                # If connected, fetch data
+                st.info("Connected! Fetching data...")
+                query = """
+                    SELECT TOP 1000 
+                        AccNo,
+                        CompanyName,
+                        RegisterNo,
+                        Address1,
+                        Address2,
+                        Address3,
+                        Address4,
+                        PostCode,
+                        Phone1,
+                        Phone2,
+                        EmailAddress,
+                        WebURL,
+                        NatureOfBusiness,
+                        IsActive
+                    FROM Debtor
+                    ORDER BY CompanyName
+                """
+                df = pd.read_sql(query, conn)
+                conn.close()
                 
-                if response.status_code == 200:
-                    data = response.json()
-                    df = pd.DataFrame(data)
-                    
-                    # Display data
-                    st.success("✅ Data retrieved successfully!")
-                    st.dataframe(
-                        df,
-                        hide_index=True,
-                        use_container_width=True,
-                        column_config={
-                            "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
-                            "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
-                            "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
-                            "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
-                        }
-                    )
-                else:
-                    st.error(f"❌ API Error: {response.text}")
+                # Display data
+                st.success("✅ Connected successfully! Showing database records:")
+                st.dataframe(
+                    df,
+                    hide_index=True,
+                    use_container_width=True,
+                    column_config={
+                        "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
+                        "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
+                        "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
+                        "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
+                    }
+                )
             
         except Exception as e:
-            st.error(f"❌ Connection failed: {str(e)}")
+            st.error(f"❌ Error: {str(e)}")
+            st.error("""
+            Please check:
+            1. SQL Server instance name is correct (A2006)
+            2. SQL Server service is running
+            3. SQL Server Browser service is running
+            4. Windows Authentication is enabled
+            5. TCP/IP protocol is enabled
+            """)
 
 def main():
     # Initialize app configuration
