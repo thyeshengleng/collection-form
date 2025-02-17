@@ -14,12 +14,11 @@ import urllib.parse
 def render_db_form():
     st.subheader("Database Connection")
     
-    # Get API URL from secrets
-    base_url = st.secrets.get("API_URL", "https://your-api-name.herokuapp.com")
-    
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
+            base_url = "http://127.0.0.1:8001"
+            
             # Check if API server is running
             try:
                 health_response = requests.get(f"{base_url}/health")
@@ -30,10 +29,10 @@ def render_db_form():
                 st.error("""
                 ❌ Cannot connect to API server
                 
-                Please check:
-                1. API server is deployed and running
-                2. API URL is correct
-                3. Network connection is working
+                Please make sure:
+                1. Run 'python api_server.py' in a separate terminal
+                2. Wait for the message 'Uvicorn running on http://127.0.0.1:8001'
+                3. Try again
                 """)
                 return
             
