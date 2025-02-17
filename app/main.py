@@ -17,64 +17,32 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Create SQLAlchemy connection string
-            params = urllib.parse.quote_plus(
-                'DRIVER={ODBC Driver 17 for SQL Server};'
-                'SERVER=DESKTOP-RMNV9QV\\A2006;'
-                'DATABASE=AED_AssignmentOne;'
-                'UID=sa;'
-                'PWD=oCt2005-ShenZhou6_A2006;'
-                'Trusted_Connection=no;'
-            )
+            # Use CSV for cloud deployment
+            is_cloud = st.secrets.get("is_streamlit_cloud", False)
             
-            # Create SQLAlchemy engine
-            engine = create_engine(
-                f"mssql+pyodbc:///?odbc_connect={params}",
-                pool_pre_ping=True,  # Check connection before using
-                pool_recycle=3600    # Recycle connections after 1 hour
-            )
-            
-            # Try to connect and fetch data
-            with st.spinner("Connecting to database..."):
-                st.info("Attempting to connect to SQL Server...")
-                
-                # Test connection first
-                with engine.connect() as conn:
-                    st.info("Connected! Fetching data...")
-                    query = """
-                        SELECT TOP 1000 
-                            AccNo,
-                            CompanyName,
-                            RegisterNo,
-                            Address1,
-                            Address2,
-                            Address3,
-                            Address4,
-                            PostCode,
-                            Phone1,
-                            Phone2,
-                            EmailAddress,
-                            WebURL,
-                            NatureOfBusiness,
-                            IsActive
-                        FROM Debtor
-                        ORDER BY CompanyName
-                    """
-                    df = pd.read_sql(query, conn)
-                
-                # Display data
-                st.success("✅ Connected successfully! Showing database records:")
-                st.dataframe(
-                    df,
-                    hide_index=True,
-                    use_container_width=True,
-                    column_config={
-                        "CompanyName": st.column_config.TextColumn("Company Name", width="medium"),
-                        "RegisterNo": st.column_config.TextColumn("Register No", width="small"),
-                        "EmailAddress": st.column_config.TextColumn("Email", width="medium"),
-                        "IsActive": st.column_config.CheckboxColumn("Active", width="small"),
-                    }
+            if is_cloud:
+                # Load from CSV
+                df = pd.read_csv("collection_records.csv")
+                st.success("✅ Data loaded from CSV!")
+            else:
+                # Local database connection
+                params = urllib.parse.quote_plus(
+                    'DRIVER={ODBC Driver 17 for SQL Server};'
+                    'SERVER=DESKTOP-RMNV9QV\\A2006;'
+                    'DATABASE=AED_AssignmentOne;'
+                    'UID=sa;'
+                    'PWD=oCt2005-ShenZhou6_A2006;'
+                    'Trusted_Connection=no;'
                 )
+                
+                engine = create_engine(f"mssql+pyodbc:///?odbc_connect={params}")
+                
+                with engine.connect() as conn:
+                    query = """SELECT TOP 1000 * FROM Debtor ORDER BY CompanyName"""
+                    df = pd.read_sql(query, conn)
+                    
+                    # Save to CSV for cloud deployment
+                    df.to_csv("collection_records.csv", index=False)
             
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
