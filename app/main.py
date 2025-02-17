@@ -27,15 +27,14 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # Use hardcoded connection details
+            # Use hardcoded connection details for SQL Server 2006
             conn_str = (
                 'DRIVER={SQL Server};'
-                'SERVER=YOUR_SERVER,1433;'  # Replace with your server
+                'SERVER=192.168.1.100;'  # Replace with your server IP
+                'PORT=1433;'             # SQL Server port
                 'DATABASE=AED_AssignmentOne;'
-                'UID=YOUR_USERNAME;'        # Replace with your username
-                'PWD=YOUR_PASSWORD;'        # Replace with your password
-                'Connect Timeout=30;'
-                'Encrypt=no;'
+                'UID=sa;'                # Replace with your username
+                'PWD=password123;'       # Replace with your password
             )
             
             # Try to connect and fetch data
