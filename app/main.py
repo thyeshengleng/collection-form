@@ -17,15 +17,30 @@ def render_db_form():
     # View Data button
     if st.button("👁️ View Database Data", use_container_width=True):
         try:
-            # API endpoint
-            api_url = "http://localhost:8001/api/debtor"
+            base_url = "http://127.0.0.1:8001"
+            
+            # Check if API server is running
+            try:
+                health_response = requests.get(f"{base_url}/health")
+                if health_response.status_code != 200:
+                    st.error("❌ API server is not responding correctly")
+                    return
+            except requests.exceptions.ConnectionError:
+                st.error("""
+                ❌ Cannot connect to API server
+                
+                Please make sure:
+                1. Run 'python api_server.py' in a separate terminal
+                2. Wait for the message 'Uvicorn running on http://127.0.0.1:8001'
+                3. Try again
+                """)
+                return
             
             # Try to fetch data
             with st.spinner("Fetching data..."):
-                response = requests.get(api_url)
+                response = requests.get(f"{base_url}/api/debtor")
                 
                 if response.status_code == 200:
-                    # Convert JSON to DataFrame
                     data = response.json()
                     df = pd.DataFrame(data)
                     
@@ -47,13 +62,6 @@ def render_db_form():
             
         except Exception as e:
             st.error(f"❌ Connection failed: {str(e)}")
-            st.error("""
-            Please check:
-            1. API server is running (python api_server.py)
-            2. API endpoint is correct
-            3. Network connection is working
-            4. No firewall blocking port 8001
-            """)
 
 def main():
     # Initialize app configuration
