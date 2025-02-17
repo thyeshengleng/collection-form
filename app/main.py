@@ -20,7 +20,7 @@ def render_db_form():
             # Create direct ODBC connection
             conn_str = (
                 'DRIVER={SQL Server};'
-                'SERVER=DESKTOP-RMNV9QV\\A2006;'
+                'SERVER=DESKTOP-RMNV9QV\A2006;'
                 'DATABASE=AED_AssignmentOne;'
                 'UID=sa;'
                 'PWD=oCt2005-ShenZhou6_A2006;'
