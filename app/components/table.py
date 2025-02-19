@@ -6,33 +6,42 @@ import time
 def render_view_form(record):
     st.subheader(f"View Record: {record['Company Name']}")
     
-    # Display all record details in read-only format
+    # User Type
+    st.markdown("### User Type")
+    st.text_input("User Type", value=record['User Type'], disabled=True)
+    
+    # Company Information
     st.markdown("### Company Information")
-    st.text(f"User Type: {record['User Type']}")
-    st.text(f"Company Name: {record['Company Name']}")
-    st.text(f"Email: {record['Email']}")
-    st.text(f"Address: {record['Address']}")
-    st.text(f"Business Info: {record['Business Info']}")
-    st.text(f"Tax ID: {record['Tax ID']}")
-    st.text(f"E-Invoice Start Date: {record['E-Invoice Start Date']}")
+    st.text_input("Company Name", value=record['Company Name'], disabled=True)
+    st.text_input("Email", value=record['Email'], disabled=True)
+    st.text_area("Address", value=record['Address'], disabled=True)
+    st.text_input("Business Info", value=record['Business Info'], disabled=True)
+    st.text_input("Tax ID", value=record['Tax ID'], disabled=True)
+    st.text_input("E-Invoice Start Date", value=record['E-Invoice Start Date'], disabled=True)
     
+    # Plugin Information
     st.markdown("### Plug In Module")
-    st.text(record['Plug In Module'])
+    st.text_area("Selected Plugins", value=record['Plug In Module'], disabled=True)
     
+    # Additional Information
     st.markdown("### Additional Information")
-    st.text(f"VPN Info: {record['VPN Info']}")
-    st.text(f"Module & User License: {record['Module & User License']}")
+    st.text_input("VPN Info", value=record['VPN Info'], disabled=True)
+    st.text_input("Module & User License", value=record['Module & User License'], disabled=True)
     
+    # Report Information
     st.markdown("### Report Design Template")
-    st.text(record['Report Design Template'])
+    st.text_area("Selected Reports", value=record['Report Design Template'], disabled=True)
     
+    # Migration Information
     st.markdown("### Migration Information")
-    st.text(f"Master Data: {record['Migration Master Data']}")
-    st.text(f"Outstanding Balance: {record['Migration Outstanding Balance']}")
+    st.text_input("Master Data", value=record['Migration Master Data'], disabled=True)
+    st.text_input("Outstanding Balance", value=record['Migration Outstanding Balance'], disabled=True)
     
+    # Status
     st.markdown("### Status")
-    st.text(record['Status'])
+    st.text_input("Current Status", value=record['Status'], disabled=True)
     
+    # Close button
     if st.button("Close", use_container_width=True):
         st.session_state.view_mode = False
         st.rerun()
@@ -64,7 +73,7 @@ def render_records_table():
             column_config={
                 "Select": st.column_config.CheckboxColumn(
                     "Select",
-                    help="Select to edit or delete",
+                    help="Select to view or delete",
                     default=False,
                     width="small"
                 ),
@@ -87,21 +96,15 @@ def render_records_table():
             idx = selected_rows.index[0]
             record = df.iloc[idx]
             
-            col1, col2, col3 = st.columns(3)
+            col1, col2 = st.columns(2)
             
             with col1:
-                if st.button("👁️ View", use_container_width=True):
+                if st.button("👁️ View Details", use_container_width=True):
                     st.session_state.view_mode = True
                     st.session_state.selected_record = idx
                     st.rerun()
             
             with col2:
-                if st.button("✏️ Edit", use_container_width=True):
-                    st.session_state.edit_mode = True
-                    st.session_state.selected_record = idx
-                    st.rerun()
-            
-            with col3:
                 if st.button("🗑️ Delete", use_container_width=True):
                     if st.button("⚠️ Confirm Delete"):
                         df = delete_record(idx)
