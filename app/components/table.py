@@ -82,7 +82,7 @@ def render_records_table():
                 "Email": st.column_config.TextColumn("Email", width="medium"),
                 "Status": st.column_config.TextColumn("Status", width="small"),
             },
-            disabled=["Company Name", "User Type", "Email", "Status", "Select"],
+            disabled=["Company Name", "User Type", "Email", "Status"],
             key="data_editor"
         )
         
