@@ -2,7 +2,6 @@ import streamlit as st
 from app.utils.database import load_records
 from app.config.settings import STATUS_OPTIONS
 import time
-from app.components.popup import render_popup_view
 
 def render_view_form(record):
     # Create a popup overlay and container
