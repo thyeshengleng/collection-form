@@ -1,5 +1,5 @@
 import streamlit as st
-from app.utils.database import load_records, delete_record
+from app.utils.database import load_records
 from app.config.settings import STATUS_OPTIONS
 import time
 
@@ -73,20 +73,16 @@ def render_records_table():
             column_config={
                 "Select": st.column_config.CheckboxColumn(
                     "Select",
-                    help="Select to view or delete",
+                    help="Select to view record details",
                     default=False,
                     width="small"
                 ),
                 "Company Name": st.column_config.TextColumn("Company Name", width="medium"),
                 "User Type": st.column_config.TextColumn("User Type", width="small"),
                 "Email": st.column_config.TextColumn("Email", width="medium"),
-                "Status": st.column_config.SelectboxColumn(
-                    "Status",
-                    width="small",
-                    options=STATUS_OPTIONS
-                ),
+                "Status": st.column_config.TextColumn("Status", width="small"),
             },
-            disabled=["Company Name", "User Type", "Email", "Status"],
+            disabled=["Company Name", "User Type", "Email", "Status", "Select"],
             key="data_editor"
         )
         
@@ -96,21 +92,11 @@ def render_records_table():
             idx = selected_rows.index[0]
             record = df.iloc[idx]
             
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                if st.button("👁️ View Details", use_container_width=True):
-                    st.session_state.view_mode = True
-                    st.session_state.selected_record = idx
-                    st.rerun()
-            
-            with col2:
-                if st.button("🗑️ Delete", use_container_width=True):
-                    if st.button("⚠️ Confirm Delete"):
-                        df = delete_record(idx)
-                        st.success(f"Deleted record for {record['Company Name']}")
-                        time.sleep(1)
-                        st.rerun()
+            # Single view button
+            if st.button("👁️ View Details", use_container_width=True):
+                st.session_state.view_mode = True
+                st.session_state.selected_record = idx
+                st.rerun()
         
         # Show view form if in view mode
         if getattr(st.session_state, 'view_mode', False) and st.session_state.selected_record is not None:
