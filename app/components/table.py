@@ -48,6 +48,12 @@ def render_view_form(record):
             cursor: pointer;
             font-size: 1.5rem;
             color: #666;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }}
+        .popup-close:hover {{
+            background: #f0f0f0;
         }}
         .popup-content {{
             margin: 1rem 0;
@@ -66,13 +72,26 @@ def render_view_form(record):
             width: 100%;
         }}
         </style>
-        <div class="popup-overlay">
-            <div class="popup-container">
+        <div class="popup-overlay" onclick="closePopup()">
+            <div class="popup-container" onclick="event.stopPropagation()">
                 <div class="popup-header">
                     <h3>View Record: {record.get('Company Name', '')}</h3>
-                    <span class="popup-close" onclick="javascript:document.querySelector('.popup-overlay').remove()">×</span>
+                    <span class="popup-close" onclick="closePopup()">×</span>
                 </div>
                 <div class="popup-content">
+        """
+    
+    # Add JavaScript for closing popup
+    popup_html += """
+        <script>
+        function closePopup() {
+            document.querySelector('.popup-overlay').remove();
+            // Tell Streamlit to update
+            setTimeout(function() {
+                window.parent.postMessage({type: 'streamlit:setComponentValue', value: false}, '*');
+            }, 100);
+        }
+        </script>
     """
     
     st.markdown(popup_html, unsafe_allow_html=True)
@@ -102,17 +121,15 @@ def render_view_form(record):
                 st.text_input(field, value=record.get(field, ''), disabled=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Close button
-    if st.button("Close", key="popup_close"):
-        st.session_state.view_mode = False
-        st.rerun()
+    # Close button at bottom
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        if st.button("Close", use_container_width=True, key="popup_close"):
+            st.session_state.view_mode = False
+            st.rerun()
 
     # Close popup container
-    st.markdown("""
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("</div></div>", unsafe_allow_html=True)
 
 def render_records_table():
     df = load_records()
