@@ -110,6 +110,8 @@ def main():
         st.session_state.form_submitted = False
     if 'edit_mode' not in st.session_state:
         st.session_state.edit_mode = False
+    if 'view_mode' not in st.session_state:
+        st.session_state.view_mode = False
     if 'selected_record' not in st.session_state:
         st.session_state.selected_record = None
     if 'show_success_message' not in st.session_state:
@@ -132,35 +134,42 @@ def main():
     else:  # View/Edit Records
         df, edited_df = render_records_table()
         if df is not None and edited_df is not None:
-            # Handle edit/delete operations
+            # Handle selected rows
             selected_rows = edited_df[edited_df["Select"] == True]
             if not selected_rows.empty:
-                handle_selected_rows(selected_rows, df)
+                idx = selected_rows.index[0]
+                record = df.iloc[idx]
+                
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    if st.button("👁️ View Details", use_container_width=True):
+                        st.session_state.view_mode = True
+                        st.session_state.selected_record = idx
+                        st.rerun()
+                
+                with col2:
+                    if st.button("✏️ Edit Selected", use_container_width=True):
+                        st.session_state.edit_mode = True
+                        st.session_state.selected_record = idx
+                        st.rerun()
+                
+                with col3:
+                    if st.button("🗑️ Delete Selected", use_container_width=True):
+                        if st.button("⚠️ Confirm Delete"):
+                            df = delete_record(idx)
+                            st.success(f"Deleted record for {record['Company Name']}")
+                            time.sleep(1)
+                            st.rerun()
 
-def handle_selected_rows(selected_rows, df):
-    if len(selected_rows) == 1:
-        idx = selected_rows.index[0]
-        record = df.iloc[idx]
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("✏️ Edit Selected", use_container_width=True):
-                st.session_state.edit_mode = True
-                st.session_state.selected_record = idx
-                st.rerun()
-        
-        with col2:
-            if st.button("🗑️ Delete Selected", use_container_width=True):
-                if st.button("⚠️ Confirm Delete"):
-                    df = delete_record(idx)
-                    st.success(f"Deleted record for {record['Company Name']}")
-                    time.sleep(1)
-                    st.rerun()
+            # Show view form if in view mode
+            if st.session_state.view_mode and st.session_state.selected_record is not None:
+                record = df.iloc[st.session_state.selected_record]
+                render_popup_view(record)
 
-    # Show edit form if in edit mode
-    if st.session_state.edit_mode and st.session_state.selected_record is not None:
-        record = df.iloc[st.session_state.selected_record]
-        render_edit_form(record, st.session_state.selected_record)
+            # Show edit form if in edit mode
+            if st.session_state.edit_mode and st.session_state.selected_record is not None:
+                record = df.iloc[st.session_state.selected_record]
+                render_edit_form(record, st.session_state.selected_record)
 
 if __name__ == "__main__":
     main() 

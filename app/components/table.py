@@ -159,7 +159,7 @@ def render_records_table():
             column_config={
                 "Select": st.column_config.CheckboxColumn(
                     "Select",
-                    help="Select to view record details",
+                    help="Select to view, edit or delete",
                     default=False,
                     width="small"
                 ),
@@ -171,23 +171,6 @@ def render_records_table():
             disabled=["Company Name", "User Type", "Email", "Status"],
             key="data_editor"
         )
-        
-        # Handle selected rows
-        selected_rows = edited_df[edited_df["Select"] == True]
-        if not selected_rows.empty:
-            idx = selected_rows.index[0]
-            record = df.iloc[idx]
-            
-            # Single view button
-            if st.button("👁️ View Details", use_container_width=True):
-                st.session_state.view_mode = True
-                st.session_state.selected_record = idx
-                st.rerun()
-        
-        # Show view form if in view mode
-        if getattr(st.session_state, 'view_mode', False) and st.session_state.selected_record is not None:
-            record = df.iloc[st.session_state.selected_record]
-            render_popup_view(record)
         
         return df, edited_df
     return None, None 
