@@ -5,10 +5,9 @@ import time
 
 def render_view_form(record):
     # Create a popup overlay and container
-    st.markdown(
-        """
+    popup_html = f"""
         <style>
-        .popup-overlay {
+        .popup-overlay {{
             position: fixed;
             top: 0;
             left: 0;
@@ -17,8 +16,8 @@ def render_view_form(record):
             background: rgba(0, 0, 0, 0.5);
             z-index: 1001;
             backdrop-filter: blur(2px);
-        }
-        .popup-container {
+        }}
+        .popup-container {{
             position: fixed;
             top: 50%;
             left: 50%;
@@ -32,8 +31,8 @@ def render_view_form(record):
             max-height: 90vh;
             overflow-y: auto;
             z-index: 1002;
-        }
-        .popup-header {
+        }}
+        .popup-header {{
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -44,39 +43,39 @@ def render_view_form(record):
             top: 0;
             background: white;
             z-index: 1003;
-        }
-        .popup-close {
+        }}
+        .popup-close {{
             cursor: pointer;
             font-size: 1.5rem;
             color: #666;
-        }
-        .popup-content {
+        }}
+        .popup-content {{
             margin: 1rem 0;
-        }
-        .popup-section {
+        }}
+        .popup-section {{
             background: #f8f9fa;
             padding: 1rem;
             border-radius: 4px;
             margin-bottom: 1rem;
-        }
-        .popup-section h4 {
+        }}
+        .popup-section h4 {{
             margin-bottom: 0.5rem;
             color: #333;
-        }
-        .stButton button {
+        }}
+        .stButton button {{
             width: 100%;
-        }
+        }}
         </style>
         <div class="popup-overlay">
             <div class="popup-container">
                 <div class="popup-header">
-                    <h3>View Record: {}</h3>
+                    <h3>View Record: {record.get('Company Name', '')}</h3>
                     <span class="popup-close" onclick="javascript:document.querySelector('.popup-overlay').remove()">×</span>
                 </div>
                 <div class="popup-content">
-        """.format(record['Company Name']),
-        unsafe_allow_html=True
-    )
+    """
+    
+    st.markdown(popup_html, unsafe_allow_html=True)
 
     # Form sections with correct field names
     sections = [
