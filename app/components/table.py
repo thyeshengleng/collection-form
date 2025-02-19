@@ -74,29 +74,32 @@ def render_view_form(record):
                     <span class="popup-close" onclick="javascript:document.querySelector('.popup-overlay').remove()">×</span>
                 </div>
                 <div class="popup-content">
-        """.format(record['Company Name']),
+        """.format(record['CompanyName']),
         unsafe_allow_html=True
     )
 
-    # Form sections
+    # Form sections with correct field names
     sections = [
-        ("User Type", ["User Type"]),
-        ("Company Information", ["Company Name", "Email", "Address", "Business Info", "Tax ID", "E-Invoice Start Date"]),
-        ("Plug In Module", ["Plug In Module"]),
-        ("Additional Information", ["VPN Info", "Module & User License"]),
-        ("Report Design Template", ["Report Design Template"]),
-        ("Migration Information", ["Migration Master Data", "Migration Outstanding Balance"]),
+        ("User Type", ["UserType"]),
+        ("Company Information", ["CompanyName", "EmailAddress", "Address1", "BusinessInfo", "TaxID", "EInvoiceStartDate"]),
+        ("Plug In Module", ["PlugInModule"]),
+        ("Additional Information", ["VPNInfo", "ModuleLicense"]),
+        ("Report Design Template", ["ReportTemplate"]),
+        ("Migration Information", ["MigrationMasterData", "MigrationOutstandingBalance"]),
         ("Status", ["Status"])
     ]
 
+    # Display sections with proper field labels
     for section_title, fields in sections:
         st.markdown(f'<div class="popup-section">', unsafe_allow_html=True)
         st.markdown(f"#### {section_title}")
         for field in fields:
-            if field in ["Address", "Plug In Module", "Report Design Template"]:
-                st.text_area(field, value=record[field], disabled=True)
+            # Get display name (convert CamelCase to spaces)
+            display_name = ' '.join(field.split('_')).title()
+            if field in ["Address1", "PlugInModule", "ReportTemplate"]:
+                st.text_area(display_name, value=record.get(field, ''), disabled=True)
             else:
-                st.text_input(field, value=record[field], disabled=True)
+                st.text_input(display_name, value=record.get(field, ''), disabled=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     # Close button
