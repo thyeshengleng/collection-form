@@ -152,7 +152,7 @@ def render_popup_view(record):
             color: #333;
         }}
         </style>
-        <div class="popup-overlay" onclick="closePopup()">
+        <div class="popup-overlay" id="popupOverlay">
             <div class="popup-container" onclick="event.stopPropagation()">
                 <div class="popup-header">
                     <h3>View Record: {record.get('Company Name', '')}</h3>
@@ -165,12 +165,35 @@ def render_popup_view(record):
     popup_html += """
         <script>
         function closePopup() {
-            document.querySelector('.popup-overlay').remove();
-            // Tell Streamlit to update
-            setTimeout(function() {
-                window.parent.postMessage({type: 'streamlit:setComponentValue', value: false}, '*');
-            }, 100);
+            const element = document.getElementById('popupOverlay');
+            if (element) {
+                element.style.display = 'none';
+                // Update Streamlit state
+                window.parent.postMessage({
+                    type: 'streamlit:setComponentValue',
+                    value: false
+                }, '*');
+                
+                // Force Streamlit to rerun
+                window.parent.postMessage({
+                    type: 'streamlit:componentRerun'
+                }, '*');
+            }
         }
+
+        // Close popup when clicking overlay
+        document.getElementById('popupOverlay').addEventListener('click', function(e) {
+            if (e.target.id === 'popupOverlay') {
+                closePopup();
+            }
+        });
+
+        // Close popup when pressing Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePopup();
+            }
+        });
         </script>
     """
     
