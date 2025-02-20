@@ -99,12 +99,11 @@ def render_popup_view(record):
             background: rgba(0, 0, 0, 0.5);
             z-index: 1001;
             backdrop-filter: blur(2px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }}
         .popup-container {{
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             background: white;
             padding: 2rem;
             border-radius: 8px;
@@ -113,7 +112,7 @@ def render_popup_view(record):
             max-width: 800px;
             max-height: 85vh;
             overflow-y: auto;
-            z-index: 1002;
+            position: relative;
         }}
         .popup-header {{
             display: flex;
@@ -125,9 +124,11 @@ def render_popup_view(record):
             position: sticky;
             top: 0;
             background: white;
-            z-index: 1003;
         }}
         .popup-close {{
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
             cursor: pointer;
             font-size: 1.5rem;
             color: #666;
@@ -153,21 +154,21 @@ def render_popup_view(record):
         }}
         </style>
         <div class="popup-overlay" id="popupOverlay">
-            <div class="popup-container" onclick="event.stopPropagation()">
+            <div class="popup-container">
                 <div class="popup-header">
                     <h3>View Record: {record.get('Company Name', '')}</h3>
-                    <span class="popup-close" onclick="closePopup()">×</span>
+                    <button class="popup-close" onclick="closePopup()">×</button>
                 </div>
                 <div class="popup-content">
         """
-    
+
     # Add JavaScript for closing popup
     popup_html += """
         <script>
         function closePopup() {
             const element = document.getElementById('popupOverlay');
             if (element) {
-                element.style.display = 'none';
+                element.remove();
                 // Update Streamlit state
                 window.parent.postMessage({
                     type: 'streamlit:setComponentValue',
@@ -196,7 +197,7 @@ def render_popup_view(record):
         });
         </script>
     """
-    
+
     st.markdown(popup_html, unsafe_allow_html=True)
 
     # Form sections
