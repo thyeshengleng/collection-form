@@ -3,10 +3,6 @@ from app.utils.database import load_records
 from app.config.settings import STATUS_OPTIONS
 import time
 
-def render_view_form(record):
-    from app.components.popup import render_popup_view
-    render_popup_view(record)
-
 def render_records_table():
     df = load_records()
     
