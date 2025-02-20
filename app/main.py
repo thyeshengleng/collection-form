@@ -87,153 +87,71 @@ def render_db_form():
             """)
 
 def render_popup_view(record):
-    # Create a popup overlay and container
-    popup_html = f"""
+    # Create a container for the popup
+    popup_container = st.container()
+    
+    with popup_container:
+        # Display the form content
+        st.subheader(f"View Record: {record.get('Company Name', '')}")
+        
+        # User Type
+        st.markdown("### User Type")
+        st.text_input("User Type", value=record.get('User Type', ''), disabled=True)
+        
+        # Company Information
+        st.markdown("### Company Information")
+        st.text_input("Company Name", value=record.get('Company Name', ''), disabled=True)
+        st.text_input("Email", value=record.get('Email', ''), disabled=True)
+        st.text_area("Address", value=record.get('Address', ''), disabled=True)
+        st.text_input("Business Info", value=record.get('Business Info', ''), disabled=True)
+        st.text_input("Tax ID", value=record.get('Tax ID', ''), disabled=True)
+        st.text_input("E-Invoice Start Date", value=record.get('E-Invoice Start Date', ''), disabled=True)
+        
+        # Plugin Information
+        st.markdown("### Plug In Module")
+        st.text_area("Selected Plugins", value=record.get('Plug In Module', ''), disabled=True)
+        
+        # Additional Information
+        st.markdown("### Additional Information")
+        st.text_input("VPN Info", value=record.get('VPN Info', ''), disabled=True)
+        st.text_input("Module & User License", value=record.get('Module & User License', ''), disabled=True)
+        
+        # Report Information
+        st.markdown("### Report Design Template")
+        st.text_area("Selected Reports", value=record.get('Report Design Template', ''), disabled=True)
+        
+        # Migration Information
+        st.markdown("### Migration Information")
+        st.text_input("Master Data", value=record.get('Migration Master Data', ''), disabled=True)
+        st.text_input("Outstanding Balance", value=record.get('Migration Outstanding Balance', ''), disabled=True)
+        
+        # Status
+        st.markdown("### Status")
+        st.text_input("Current Status", value=record.get('Status', ''), disabled=True)
+        
+        # Close button
+        col1, col2, col3 = st.columns([1,2,1])
+        with col2:
+            if st.button("Close", use_container_width=True):
+                st.session_state.view_mode = False
+                st.rerun()
+
+    # Add popup styling
+    st.markdown("""
         <style>
-        .popup-overlay {{
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1001;
-            backdrop-filter: blur(2px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }}
-        .popup-container {{
+        .stApp {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlock"] {
             background: white;
             padding: 2rem;
             border-radius: 8px;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
-            width: 90%;
+            margin: 2rem auto;
             max-width: 800px;
-            max-height: 85vh;
-            overflow-y: auto;
-            position: relative;
-        }}
-        .popup-header {{
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eee;
-            position: sticky;
-            top: 0;
-            background: white;
-        }}
-        .popup-close {{
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            cursor: pointer;
-            font-size: 1.5rem;
-            color: #666;
-            padding: 5px 10px;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }}
-        .popup-close:hover {{
-            background: #f0f0f0;
-        }}
-        .popup-content {{
-            margin: 1rem 0;
-        }}
-        .popup-section {{
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-        }}
-        .popup-section h4 {{
-            margin-bottom: 0.5rem;
-            color: #333;
-        }}
-        </style>
-        <div class="popup-overlay" id="popupOverlay">
-            <div class="popup-container">
-                <div class="popup-header">
-                    <h3>View Record: {record.get('Company Name', '')}</h3>
-                    <button class="popup-close" onclick="closePopup()">×</button>
-                </div>
-                <div class="popup-content">
-        """
-
-    # Add JavaScript for closing popup
-    popup_html += """
-        <script>
-        function closePopup() {
-            const element = document.getElementById('popupOverlay');
-            if (element) {
-                element.remove();
-                // Update Streamlit state
-                window.parent.postMessage({
-                    type: 'streamlit:setComponentValue',
-                    value: false
-                }, '*');
-                
-                // Force Streamlit to rerun
-                window.parent.postMessage({
-                    type: 'streamlit:componentRerun'
-                }, '*');
-            }
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
-
-        // Close popup when clicking overlay
-        document.getElementById('popupOverlay').addEventListener('click', function(e) {
-            if (e.target.id === 'popupOverlay') {
-                closePopup();
-            }
-        });
-
-        // Close popup when pressing Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closePopup();
-            }
-        });
-        </script>
-    """
-
-    st.markdown(popup_html, unsafe_allow_html=True)
-
-    # Form sections
-    sections = [
-        ("User Type", ["User Type"]),
-        ("Company Information", [
-            "Company Name", "Email", "Address", 
-            "Business Info", "Tax ID", "E-Invoice Start Date"
-        ]),
-        ("Plug In Module", ["Plug In Module"]),
-        ("Additional Information", ["VPN Info", "Module & User License"]),
-        ("Report Design Template", ["Report Design Template"]),
-        ("Migration Information", ["Migration Master Data", "Migration Outstanding Balance"]),
-        ("Status", ["Status"])
-    ]
-
-    # Display sections
-    for section_title, fields in sections:
-        st.markdown(f'<div class="popup-section">', unsafe_allow_html=True)
-        st.markdown(f"#### {section_title}")
-        for field in fields:
-            if field in ["Address", "Plug In Module", "Report Design Template"]:
-                st.text_area(field, value=record.get(field, ''), disabled=True)
-            else:
-                st.text_input(field, value=record.get(field, ''), disabled=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # Close button at bottom
-    col1, col2, col3 = st.columns([1,2,1])
-    with col2:
-        if st.button("Close", use_container_width=True, key="popup_close"):
-            st.session_state.view_mode = False
-            st.rerun()
-
-    # Close popup container
-    st.markdown("</div></div>", unsafe_allow_html=True)
+        </style>
+    """, unsafe_allow_html=True)
 
 def main():
     # Initialize app configuration
