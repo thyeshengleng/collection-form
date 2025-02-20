@@ -87,71 +87,50 @@ def render_db_form():
             """)
 
 def render_popup_view(record):
-    # Create a container for the popup
-    popup_container = st.container()
+    # Display the form content
+    st.subheader(f"View Record: {record.get('Company Name', '')}")
     
-    with popup_container:
-        # Display the form content
-        st.subheader(f"View Record: {record.get('Company Name', '')}")
-        
-        # User Type
-        st.markdown("### User Type")
-        st.text_input("User Type", value=record.get('User Type', ''), disabled=True)
-        
-        # Company Information
-        st.markdown("### Company Information")
-        st.text_input("Company Name", value=record.get('Company Name', ''), disabled=True)
-        st.text_input("Email", value=record.get('Email', ''), disabled=True)
-        st.text_area("Address", value=record.get('Address', ''), disabled=True)
-        st.text_input("Business Info", value=record.get('Business Info', ''), disabled=True)
-        st.text_input("Tax ID", value=record.get('Tax ID', ''), disabled=True)
-        st.text_input("E-Invoice Start Date", value=record.get('E-Invoice Start Date', ''), disabled=True)
-        
-        # Plugin Information
-        st.markdown("### Plug In Module")
-        st.text_area("Selected Plugins", value=record.get('Plug In Module', ''), disabled=True)
-        
-        # Additional Information
-        st.markdown("### Additional Information")
-        st.text_input("VPN Info", value=record.get('VPN Info', ''), disabled=True)
-        st.text_input("Module & User License", value=record.get('Module & User License', ''), disabled=True)
-        
-        # Report Information
-        st.markdown("### Report Design Template")
-        st.text_area("Selected Reports", value=record.get('Report Design Template', ''), disabled=True)
-        
-        # Migration Information
-        st.markdown("### Migration Information")
-        st.text_input("Master Data", value=record.get('Migration Master Data', ''), disabled=True)
-        st.text_input("Outstanding Balance", value=record.get('Migration Outstanding Balance', ''), disabled=True)
-        
-        # Status
-        st.markdown("### Status")
-        st.text_input("Current Status", value=record.get('Status', ''), disabled=True)
-        
-        # Close button
-        col1, col2, col3 = st.columns([1,2,1])
-        with col2:
-            if st.button("Close", use_container_width=True):
-                st.session_state.view_mode = False
-                st.rerun()
-
-    # Add popup styling
-    st.markdown("""
-        <style>
-        .stApp {
-            background: rgba(0, 0, 0, 0.3);
-        }
-        [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlock"] {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            margin: 2rem auto;
-            max-width: 800px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        </style>
-    """, unsafe_allow_html=True)
+    # User Type
+    st.markdown("### User Type")
+    st.text_input("User Type", value=record.get('User Type', ''), disabled=True)
+    
+    # Company Information
+    st.markdown("### Company Information")
+    st.text_input("Company Name", value=record.get('Company Name', ''), disabled=True)
+    st.text_input("Email", value=record.get('Email', ''), disabled=True)
+    st.text_area("Address", value=record.get('Address', ''), disabled=True)
+    st.text_input("Business Info", value=record.get('Business Info', ''), disabled=True)
+    st.text_input("Tax ID", value=record.get('Tax ID', ''), disabled=True)
+    st.text_input("E-Invoice Start Date", value=record.get('E-Invoice Start Date', ''), disabled=True)
+    
+    # Plugin Information
+    st.markdown("### Plug In Module")
+    st.text_area("Selected Plugins", value=record.get('Plug In Module', ''), disabled=True)
+    
+    # Additional Information
+    st.markdown("### Additional Information")
+    st.text_input("VPN Info", value=record.get('VPN Info', ''), disabled=True)
+    st.text_input("Module & User License", value=record.get('Module & User License', ''), disabled=True)
+    
+    # Report Information
+    st.markdown("### Report Design Template")
+    st.text_area("Selected Reports", value=record.get('Report Design Template', ''), disabled=True)
+    
+    # Migration Information
+    st.markdown("### Migration Information")
+    st.text_input("Master Data", value=record.get('Migration Master Data', ''), disabled=True)
+    st.text_input("Outstanding Balance", value=record.get('Migration Outstanding Balance', ''), disabled=True)
+    
+    # Status
+    st.markdown("### Status")
+    st.text_input("Current Status", value=record.get('Status', ''), disabled=True)
+    
+    # Close button
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        if st.button("Close", use_container_width=True):
+            st.session_state.view_mode = False
+            st.rerun()
 
 def main():
     # Initialize app configuration
