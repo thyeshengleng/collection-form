@@ -20,18 +20,23 @@ def render_db_form():
             # Create SQLAlchemy connection string
             params = urllib.parse.quote_plus(
                 'DRIVER={ODBC Driver 17 for SQL Server};'
-                'SERVER=DESKTOP-RMNV9QV\\A2006;'
+                f'SERVER={socket.gethostbyname(socket.gethostname())},1433;'
                 'DATABASE=AED_AssignmentOne;'
                 'UID=sa;'
                 'PWD=oCt2005-ShenZhou6_A2006;'
                 'Trusted_Connection=no;'
+                'Encrypt=yes;'
+                'TrustServerCertificate=yes;'
             )
             
-            # Create SQLAlchemy engine
+            # Create SQLAlchemy engine with extended timeout
             engine = create_engine(
                 f"mssql+pyodbc:///?odbc_connect={params}",
-                pool_pre_ping=True,  # Check connection before using
-                pool_recycle=3600    # Recycle connections after 1 hour
+                pool_pre_ping=True,
+                pool_recycle=3600,
+                connect_args={
+                    'timeout': 30  # Increase connection timeout to 30 seconds
+                }
             )
             
             # Try to connect and fetch data
