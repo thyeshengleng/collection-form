@@ -22,7 +22,6 @@ def render_records_table():
         # Create interactive table
         view_df = df.copy()
         view_df.insert(0, "Select", False)
-        view_df.insert(1, "Actions", "View Details")
         
         edited_df = st.data_editor(
             view_df,
@@ -35,25 +34,20 @@ def render_records_table():
                     default=False,
                     width="small"
                 ),
-                "Actions": st.column_config.ButtonColumn(
-                    "Actions",
-                    help="Click to view details",
-                    width="small"
-                ),
                 "Company Name": st.column_config.TextColumn("Company Name", width="medium"),
                 "User Type": st.column_config.TextColumn("User Type", width="small"),
                 "Email": st.column_config.TextColumn("Email", width="medium"),
                 "Status": st.column_config.TextColumn("Status", width="small"),
             },
-            disabled=["Company Name", "User Type", "Email", "Status", "Actions"],
+            disabled=["Company Name", "User Type", "Email", "Status"],
             key="data_editor"
         )
         
-        # Handle view details button click
-        clicked_rows = edited_df[edited_df["Actions"].eq("View Details")]
-        if not clicked_rows.empty:
+        # Handle record selection and view details
+        selected_rows = edited_df[edited_df["Select"]]
+        if not selected_rows.empty:
             with st.expander("Record Details", expanded=True):
-                selected_record = df.loc[clicked_rows.index[0]]
+                selected_record = df.loc[selected_rows.index[0]]
                 for column, value in selected_record.items():
                     st.write(f"**{column}:** {value}")
         
