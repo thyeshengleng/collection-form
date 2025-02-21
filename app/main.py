@@ -20,10 +20,11 @@ def render_db_form():
             # Create SQLAlchemy connection string
             params = urllib.parse.quote_plus(
                 'DRIVER={ODBC Driver 17 for SQL Server};'
-                'SERVER=localhost;'
+                'SERVER=DESKTOP-RMNV9QV\\A2006;'
                 'DATABASE=AED_AssignmentOne;'
-                'Trusted_Connection=yes;'
-                'timeout=30;'
+                'UID=sa;'
+                'PWD=oCt2005-ShenZhou6_A2006;'
+                'Trusted_Connection=no;'
             )
             
             # Create SQLAlchemy engine
