@@ -7,7 +7,8 @@ async function handleRequest(request) {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Credentials': 'true'
   }
 
   // Handle OPTIONS request for CORS preflight
@@ -19,6 +20,12 @@ async function handleRequest(request) {
 
   // Serve the static HTML for the root path
   if (new URL(request.url).pathname === '/') {
+    // Check if user is authenticated
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+      return Response.redirect('https://collection-form.streamlit.app/login', 302);
+    }
+
     return new Response(`
       <!DOCTYPE html>
       <html>
@@ -27,7 +34,9 @@ async function handleRequest(request) {
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <script>
-              window.location.href = 'https://collection-form.streamlit.app';
+              // Include auth token in redirect
+              const authToken = '${authHeader.split(' ')[1]}';
+              window.location.href = 'https://collection-form.streamlit.app?token=' + authToken;
           </script>
       </head>
       <body style="font-family: Arial, sans-serif; text-align: center; padding-top: 50px;">
