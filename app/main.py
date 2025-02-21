@@ -4,6 +4,7 @@ from datetime import datetime
 import time
 import requests
 import pyodbc
+import urllib.parse
 from sqlalchemy import create_engine
 from app.utils.database import load_records, save_records, create_record, update_record, delete_record
 from app.components.form import render_create_form
