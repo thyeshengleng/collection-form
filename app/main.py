@@ -78,7 +78,6 @@ def render_db_form():
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
             st.error("""
-            Please check:
             1. SQL Server instance name is correct (A2006)
             2. SQL Server service is running
             3. SQL Server Browser service is running
@@ -184,21 +183,14 @@ def main():
             if not selected_rows.empty:
                 idx = selected_rows.index[0]
                 record = df.iloc[idx]
-                
-                col1, col2, col3 = st.columns(3)
+                col1, col2 = st.columns(2)
                 with col1:
-                    if st.button("👁️ View Details", use_container_width=True):
-                        st.session_state.view_mode = True
-                        st.session_state.selected_record = idx
-                        st.rerun()
-                
-                with col2:
                     if st.button("✏️ Edit Selected", use_container_width=True):
                         st.session_state.edit_mode = True
                         st.session_state.selected_record = idx
                         st.rerun()
                 
-                with col3:
+                with col2:
                     if st.button("🗑️ Delete Selected", use_container_width=True):
                         if st.button("⚠️ Confirm Delete"):
                             df = delete_record(idx)
@@ -217,4 +209,4 @@ def main():
                 render_edit_form(record, st.session_state.selected_record)
 
 if __name__ == "__main__":
-    main() 
+    main()
