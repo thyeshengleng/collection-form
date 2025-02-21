@@ -20,7 +20,7 @@ def render_db_form():
             # Create SQLAlchemy connection string
             params = urllib.parse.quote_plus(
                 'DRIVER={ODBC Driver 17 for SQL Server};'
-                'SERVER= 26.26.26.1,12345;'
+                'SERVER= 26.249.35.222/A2006;'
                 'DATABASE=AED_AssignmentOne;'
                 'UID=sa;'
                 'PWD=oCt2005-ShenZhou6_A2006;'
