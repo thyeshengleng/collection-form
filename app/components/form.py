@@ -113,11 +113,56 @@ def render_create_form():
             if st.checkbox(report, key=f"report_{report}"):
                 selected_reports.append(report)
     
-    # Migration Information
+    # Implementation Section
     st.markdown("---")
-    st.subheader("Migration Details")
-    migration_master = st.text_input("Migration Master Data", value="", key="migration_master")
-    migration_outstanding = st.text_input("Migration Outstanding Balance", value="", key="migration_outstanding")
+    st.subheader("B. IMPLEMENTATION")
+    st.write("(Kindly provide us your existing or desired A4/A5 Letter Format)")
+    
+    implementation_data = {}
+    for option in IMPLEMENTATION_OPTIONS:
+        implementation_data[option] = st.text_input(f"{option} Document Numbering Format:", key=f"impl_{option}")
+    
+    # Master Data Section
+    st.markdown("---")
+    st.subheader("C. MASTER DATA")
+    st.write("(Kindly provide us below data in excel format!)")
+    
+    master_data = {}
+    descriptions = {
+        "CHART OF ACCOUNT": "(Your COA # only/Autoccount COA standard template)",
+        "DEBTOR": "(Your List of Customer)",
+        "CREDITOR": "(Your List of Supplier)",
+        "STOCK ITEM": "(Your List of Items/Products)"
+    }
+    
+    for option in MASTER_DATA_OPTIONS:
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.write(f"{option} {descriptions[option]}")
+        with col2:
+            master_data[option] = st.checkbox("", key=f"master_{option}")
+    
+    # Migration Section
+    st.markdown("---")
+    st.subheader("D. MIGRATION")
+    st.write("(Kindly provide us outstanding data in excel format!)")
+    
+    migration_data = {}
+    descriptions = {
+        "DEBTOR AGING": "Outstanding Debtor Invoice ,OR, CN, DN",
+        "CREDITOR AGING": "Outstanding Creditor Invoice ,PV, CN, DN",
+        "TRIAL BALANCE REPORT": "For Account Opening Purpose",
+        "BALANCE SHEET REPORT": "For Account Opening Purpose",
+        "STOCK BALANCE": "For Item Opening Balance Purpose",
+        "SO/PO OUTSTANDING": "Outstanding SO/PO by Item, and amount"
+    }
+    
+    for option in MIGRATION_OPTIONS:
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.write(f"{option}: {descriptions[option]}")
+        with col2:
+            migration_data[option] = st.checkbox("", key=f"migration_{option}")
     
     # Status
     st.markdown("---")
