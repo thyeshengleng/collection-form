@@ -71,20 +71,6 @@ def render_create_form():
     st.markdown("---")
     st.subheader("A. COMPANY INFORMATION")
     
-    # Create a table-like structure with columns
-    col_desc, col_details, col_status, col_file, col_date = st.columns([2, 3, 1, 1, 1])
-    
-    with col_desc:
-        st.write("ACTION DESCRIPTION")
-    with col_details:
-        st.write("DETAILS")
-    with col_status:
-        st.write("STATUS")
-    with col_file:
-        st.write("FILE RECEIVE")
-    with col_date:
-        st.write("DATE COLLECT")
-    
     # Company Information Fields
     company_name = st.text_input("1. COMPANY NAME:", value="", key="company_name")
     company_email = st.text_input("2. COMPANY EMAIL:", value="", key="company_email")
