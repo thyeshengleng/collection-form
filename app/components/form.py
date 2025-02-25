@@ -44,99 +44,60 @@ def render_create_form():
     st.session_state.edit_mode = False
     st.session_state.selected_record = None
     
-    # Add PDF Export button at the top
-    if st.button("📄 Preview as PDF", use_container_width=True):
-        try:
-            from app.utils.pdf_generator import generate_pdf
-            import tempfile
-            import os
-            
-            # Create form data dictionary for preview
-            preview_data = {
-                "User Type": "New User" if st.session_state.get('new_user', False) else "Existing User",
-                "Company Name": st.session_state.get('company_name', ''),
-                "Email": st.session_state.get('email', ''),
-                "Address": st.session_state.get('address', ''),
-                "Business Info": st.session_state.get('business_info', ''),
-                "Tax ID": st.session_state.get('tax_id', ''),
-                "E-Invoice Start Date": st.session_state.get('e_invoice_start_date', ''),
-                "Plug In Module": ", ".join(st.session_state.get('selected_plugins', [])),
-                "VPN Info": st.session_state.get('vpn_info', ''),
-                "Module & User License": st.session_state.get('module_license', ''),
-                "Report Design Template": ", ".join(st.session_state.get('selected_reports', [])),
-                "Migration Master Data": st.session_state.get('migration_master', ''),
-                "Migration Outstanding Balance": st.session_state.get('migration_outstanding', ''),
-                "Status": st.session_state.get('status', '')
-            }
-            
-            # Create a temporary file for the PDF
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
-                generate_pdf(preview_data, tmp_file.name)
-                
-                # Read the generated PDF
-                with open(tmp_file.name, 'rb') as pdf_file:
-                    pdf_bytes = pdf_file.read()
-                
-                # Create download button
-                company_name = preview_data['Company Name'] or 'new_record'
-                st.download_button(
-                    label="⬇️ Download PDF",
-                    data=pdf_bytes,
-                    file_name=f"{company_name}_job_order.pdf",
-                    mime="application/pdf",
-                    use_container_width=True
-                )
-                
-                # Clean up the temporary file
-                os.unlink(tmp_file.name)
-                
-        except Exception as e:
-            st.error(f"Error generating PDF: {str(e)}")
+    st.title("Job Order Form")
     
-    # User Type Selection
-    st.subheader("User Type")
-    new_user = st.checkbox("New User")
-    existing_user = st.checkbox("Existing User")
+    # Create two columns for the form layout
+    left_col, right_col = st.columns(2)
+    
+    with left_col:
+        # User Type Selection
+        st.subheader("1. User Type")
+        new_user = st.checkbox("New User")
+        existing_user = st.checkbox("Existing User")
 
-    if st.session_state.form_submitted and not (new_user or existing_user):
-        st.error("Please select a user type")
+        if st.session_state.form_submitted and not (new_user or existing_user):
+            st.error("Please select a user type")
 
-    # Company Information
-    st.subheader("Company Information")
-    company_name = st.text_input("COMPANY NAME", value="", key="company_name")
-    email = st.text_input("EMAIL", value="", key="email")
-    address = st.text_area("ADDRESS", value="", key="address")
-    business_info = st.text_input("BUSINESS INFO", value="", key="business_info")
-    tax_id = st.text_input("TAX ID", value="", key="tax_id")
-    e_invoice_start_date = st.date_input("E-INVOICE START DATE", value=None, key="e_invoice_start_date")
+        # Company Information
+        st.subheader("2. Company Information")
+        company_name = st.text_input("Company Name*", value="", key="company_name")
+        email = st.text_input("Email*", value="", key="email")
+        address = st.text_area("Address", value="", key="address")
+        business_info = st.text_input("Business Info", value="", key="business_info")
+        tax_id = st.text_input("Tax ID", value="", key="tax_id")
+        e_invoice_start_date = st.date_input("E-Invoice Start Date", value=None, key="e_invoice_start_date")
 
-    # Plugin Selection
-    st.subheader("PLUG IN MODULE")
-    selected_plugins = []
-    for plugin in PLUGIN_OPTIONS:
-        if st.checkbox(plugin):
-            selected_plugins.append(plugin)
+    with right_col:
+        # Module Information
+        st.subheader("3. Module Information")
+        st.write("Plug-in Modules:")
+        selected_plugins = []
+        for plugin in PLUGIN_OPTIONS:
+            if st.checkbox(plugin, key=f"plugin_{plugin}"):
+                selected_plugins.append(plugin)
 
-    # Additional Information
-    st.subheader("Additional Information")
-    vpn_info = st.text_input("VPN INFO", value="", key="vpn_info")
-    module_license = st.text_input("MODULE & USER LICENSE", value="", key="module_license")
+        st.write("")
+        vpn_info = st.text_input("VPN Information", value="", key="vpn_info")
+        module_license = st.text_input("Module & User License", value="", key="module_license")
 
-    # Report Selection
-    st.markdown("### REPORT DESIGN TEMPLATE *")
-    selected_reports = []
-    report_cols = st.columns(2)
-    for idx, report in enumerate(REPORT_OPTIONS):
-        with report_cols[idx % 2]:
+        # Report Selection
+        st.subheader("4. Report Templates")
+        selected_reports = []
+        for report in REPORT_OPTIONS:
             if st.checkbox(report, key=f"report_{report}"):
                 selected_reports.append(report)
 
-    # Migration Information
-    migration_master = st.text_input("MIGRATION MASTER DATA", value="", key="migration_master")
-    migration_outstanding = st.text_input("MIGRATION (OUTSTANDING BALANCE)", value="", key="migration_outstanding")
+    # Migration Information (Full Width)
+    st.subheader("5. Migration Details")
+    migration_cols = st.columns(2)
+    with migration_cols[0]:
+        migration_master = st.text_input("Migration Master Data", value="", key="migration_master")
+    with migration_cols[1]:
+        migration_outstanding = st.text_input("Outstanding Balance", value="", key="migration_outstanding")
 
-    # Status
-    status = st.selectbox("Status", [""] + STATUS_OPTIONS, key="status")
+    # Status (Full Width)
+    st.subheader("6. Status")
+    status = st.selectbox("Current Status", [""] + STATUS_OPTIONS, key="status")
 
     # Save Button
     if st.button("Save Record", use_container_width=True):
