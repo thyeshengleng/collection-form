@@ -3,8 +3,10 @@ from datetime import datetime
 from app.config.settings import PLUGIN_OPTIONS, REPORT_OPTIONS, STATUS_OPTIONS
 from app.utils.database import create_record
 
-def handle_form_submit(new_user, existing_user, company_name, email, address,
-                      business_info, tax_id, e_invoice_start_date, selected_plugins,
+def handle_form_submit(new_user, existing_user, company_name, company_email, company_address,
+                      company_phone, tin_number, msic_code, nature_of_business,
+                      roc_number, pic_name, pic_phone, financial_year,
+                      e_invoice_start_date, existing_software, selected_plugins,
                       vpn_info, module_license, selected_reports, migration_master,
                       migration_outstanding, status):
     # Validate required fields
@@ -12,7 +14,7 @@ def handle_form_submit(new_user, existing_user, company_name, email, address,
         st.error("Please select a user type")
         return None
     
-    if not company_name or not email:
+    if not company_name or not company_email:
         st.error("Company Name and Email are required")
         return None
 
@@ -20,11 +22,18 @@ def handle_form_submit(new_user, existing_user, company_name, email, address,
     form_data = {
         "User Type": "New User" if new_user else "Existing User",
         "Company Name": company_name,
-        "Email": email,
-        "Address": address,
-        "Business Info": business_info,
-        "Tax ID": tax_id,
+        "Company Email": company_email,
+        "Company Address": company_address,
+        "Company Phone": company_phone,
+        "TIN Number": tin_number,
+        "MSIC Code": msic_code,
+        "Nature of Business": nature_of_business,
+        "ROC Reg. Number": roc_number,
+        "PIC Name": pic_name,
+        "PIC Phone": pic_phone,
+        "Financial Year": financial_year,
         "E-Invoice Start Date": e_invoice_start_date.strftime("%Y-%m-%d") if e_invoice_start_date else "",
+        "Existing Software": existing_software,
         "Plug In Module": ", ".join(selected_plugins),
         "VPN Info": vpn_info,
         "Module & User License": module_license,
@@ -136,8 +145,10 @@ def render_create_form():
     # Save Button
     if st.button("Save Record", use_container_width=True):
         return handle_form_submit(
-            new_user, existing_user, company_name, email, address,
-            business_info, tax_id, e_invoice_start_date, selected_plugins,
+            new_user, existing_user, company_name, company_email, company_address,
+            company_phone, tin_number, msic_code, nature_of_business,
+            roc_number, pic_name, pic_phone, financial_year,
+            e_invoice_start_date, existing_software, selected_plugins,
             vpn_info, module_license, selected_reports, migration_master,
             migration_outstanding, status
         )
