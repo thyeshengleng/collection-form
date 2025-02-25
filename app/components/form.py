@@ -100,10 +100,7 @@ def render_create_form():
     e_invoice_start_date = st.date_input("12. E-INVOICE START DATE:", value=None, key="e_invoice_start_date")
     existing_software = st.text_input("13. EXISTING OLD SOFTWARE (SQL,MILLION,UBS):", value="", key="existing_software")
     
-    address = st.text_area("Address", value="", key="address")
-    business_info = st.text_input("Business Info", value="", key="business_info")
-    tax_id = st.text_input("Tax ID", value="", key="tax_id")
-    e_invoice_start_date = st.date_input("E-Invoice Start Date", value=None, key="e_invoice_start_date")
+    # Removed redundant fields that were duplicating information
     
     # Module Information
     st.markdown("---")
