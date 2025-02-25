@@ -97,6 +97,38 @@ def render_popup_view(record):
     # Display the form content
     st.subheader(f"View Record: {record.get('Company Name', '')}")
     
+    # Add PDF Export button
+    if st.button("📄 Export to PDF", use_container_width=True):
+        try:
+            from app.utils.pdf_generator import generate_pdf
+            import tempfile
+            import os
+            
+            # Create a temporary file for the PDF
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+                generate_pdf(record, tmp_file.name)
+                
+                # Read the generated PDF
+                with open(tmp_file.name, 'rb') as pdf_file:
+                    pdf_bytes = pdf_file.read()
+                
+                # Create download button
+                company_name = record.get('Company Name', 'record').replace(' ', '_')
+                st.download_button(
+                    label="⬇️ Download PDF",
+                    data=pdf_bytes,
+                    file_name=f"{company_name}_job_order.pdf",
+                    mime="application/pdf",
+                    use_container_width=True
+                )
+                
+                # Clean up the temporary file
+                os.unlink(tmp_file.name)
+                
+        except Exception as e:
+            st.error(f"Error generating PDF: {str(e)}")
+
+    
     # User Type
     st.markdown("### User Type")
     st.text_input("User Type", value=record.get('User Type', ''), disabled=True)
