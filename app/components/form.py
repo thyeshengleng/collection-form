@@ -44,6 +44,55 @@ def render_create_form():
     st.session_state.edit_mode = False
     st.session_state.selected_record = None
     
+    # Add PDF Export button at the top
+    if st.button("📄 Preview as PDF", use_container_width=True):
+        try:
+            from app.utils.pdf_generator import generate_pdf
+            import tempfile
+            import os
+            
+            # Create form data dictionary for preview
+            preview_data = {
+                "User Type": "New User" if st.session_state.get('new_user', False) else "Existing User",
+                "Company Name": st.session_state.get('company_name', ''),
+                "Email": st.session_state.get('email', ''),
+                "Address": st.session_state.get('address', ''),
+                "Business Info": st.session_state.get('business_info', ''),
+                "Tax ID": st.session_state.get('tax_id', ''),
+                "E-Invoice Start Date": st.session_state.get('e_invoice_start_date', ''),
+                "Plug In Module": ", ".join(st.session_state.get('selected_plugins', [])),
+                "VPN Info": st.session_state.get('vpn_info', ''),
+                "Module & User License": st.session_state.get('module_license', ''),
+                "Report Design Template": ", ".join(st.session_state.get('selected_reports', [])),
+                "Migration Master Data": st.session_state.get('migration_master', ''),
+                "Migration Outstanding Balance": st.session_state.get('migration_outstanding', ''),
+                "Status": st.session_state.get('status', '')
+            }
+            
+            # Create a temporary file for the PDF
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+                generate_pdf(preview_data, tmp_file.name)
+                
+                # Read the generated PDF
+                with open(tmp_file.name, 'rb') as pdf_file:
+                    pdf_bytes = pdf_file.read()
+                
+                # Create download button
+                company_name = preview_data['Company Name'] or 'new_record'
+                st.download_button(
+                    label="⬇️ Download PDF",
+                    data=pdf_bytes,
+                    file_name=f"{company_name}_job_order.pdf",
+                    mime="application/pdf",
+                    use_container_width=True
+                )
+                
+                # Clean up the temporary file
+                os.unlink(tmp_file.name)
+                
+        except Exception as e:
+            st.error(f"Error generating PDF: {str(e)}")
+    
     # User Type Selection
     st.subheader("User Type")
     new_user = st.checkbox("New User")
@@ -54,12 +103,12 @@ def render_create_form():
 
     # Company Information
     st.subheader("Company Information")
-    company_name = st.text_input("COMPANY NAME", value="")
-    email = st.text_input("EMAIL", value="")
-    address = st.text_area("ADDRESS", value="")
-    business_info = st.text_input("BUSINESS INFO", value="")
-    tax_id = st.text_input("TAX ID", value="")
-    e_invoice_start_date = st.date_input("E-INVOICE START DATE", value=None)
+    company_name = st.text_input("COMPANY NAME", value="", key="company_name")
+    email = st.text_input("EMAIL", value="", key="email")
+    address = st.text_area("ADDRESS", value="", key="address")
+    business_info = st.text_input("BUSINESS INFO", value="", key="business_info")
+    tax_id = st.text_input("TAX ID", value="", key="tax_id")
+    e_invoice_start_date = st.date_input("E-INVOICE START DATE", value=None, key="e_invoice_start_date")
 
     # Plugin Selection
     st.subheader("PLUG IN MODULE")
@@ -70,8 +119,8 @@ def render_create_form():
 
     # Additional Information
     st.subheader("Additional Information")
-    vpn_info = st.text_input("VPN INFO", value="")
-    module_license = st.text_input("MODULE & USER LICENSE", value="")
+    vpn_info = st.text_input("VPN INFO", value="", key="vpn_info")
+    module_license = st.text_input("MODULE & USER LICENSE", value="", key="module_license")
 
     # Report Selection
     st.markdown("### REPORT DESIGN TEMPLATE *")
@@ -83,11 +132,11 @@ def render_create_form():
                 selected_reports.append(report)
 
     # Migration Information
-    migration_master = st.text_input("MIGRATION MASTER DATA", value="")
-    migration_outstanding = st.text_input("MIGRATION (OUTSTANDING BALANCE)", value="")
+    migration_master = st.text_input("MIGRATION MASTER DATA", value="", key="migration_master")
+    migration_outstanding = st.text_input("MIGRATION (OUTSTANDING BALANCE)", value="", key="migration_outstanding")
 
     # Status
-    status = st.selectbox("Status", [""] + STATUS_OPTIONS)
+    status = st.selectbox("Status", [""] + STATUS_OPTIONS, key="status")
 
     # Save Button
     if st.button("Save Record", use_container_width=True):
@@ -97,4 +146,4 @@ def render_create_form():
             vpn_info, module_license, selected_reports, migration_master,
             migration_outstanding, status
         )
-    return None 
+    return None
