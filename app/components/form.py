@@ -45,59 +45,65 @@ def render_create_form():
     st.session_state.selected_record = None
     
     st.title("Job Order Form")
+    st.markdown("---")
     
-    # Create two columns for the form layout
-    left_col, right_col = st.columns(2)
-    
-    with left_col:
-        # User Type Selection
-        st.subheader("1. User Type")
+    # User Type Selection
+    st.subheader("User Type")
+    col1, col2 = st.columns(2)
+    with col1:
         new_user = st.checkbox("New User")
+    with col2:
         existing_user = st.checkbox("Existing User")
 
-        if st.session_state.form_submitted and not (new_user or existing_user):
-            st.error("Please select a user type")
-
-        # Company Information
-        st.subheader("2. Company Information")
-        company_name = st.text_input("Company Name*", value="", key="company_name")
-        email = st.text_input("Email*", value="", key="email")
-        address = st.text_area("Address", value="", key="address")
-        business_info = st.text_input("Business Info", value="", key="business_info")
-        tax_id = st.text_input("Tax ID", value="", key="tax_id")
-        e_invoice_start_date = st.date_input("E-Invoice Start Date", value=None, key="e_invoice_start_date")
-
-    with right_col:
-        # Module Information
-        st.subheader("3. Module Information")
-        st.write("Plug-in Modules:")
-        selected_plugins = []
-        for plugin in PLUGIN_OPTIONS:
+    if st.session_state.form_submitted and not (new_user or existing_user):
+        st.error("Please select a user type")
+    
+    # Company Information
+    st.markdown("---")
+    st.subheader("Company Information")
+    company_name = st.text_input("Company Name*", value="", key="company_name")
+    email = st.text_input("Email*", value="", key="email")
+    address = st.text_area("Address", value="", key="address")
+    business_info = st.text_input("Business Info", value="", key="business_info")
+    tax_id = st.text_input("Tax ID", value="", key="tax_id")
+    e_invoice_start_date = st.date_input("E-Invoice Start Date", value=None, key="e_invoice_start_date")
+    
+    # Module Information
+    st.markdown("---")
+    st.subheader("Module Information")
+    st.write("Plug-in Modules:")
+    selected_plugins = []
+    cols = st.columns(3)
+    for i, plugin in enumerate(PLUGIN_OPTIONS):
+        with cols[i % 3]:
             if st.checkbox(plugin, key=f"plugin_{plugin}"):
                 selected_plugins.append(plugin)
-
-        st.write("")
-        vpn_info = st.text_input("VPN Information", value="", key="vpn_info")
-        module_license = st.text_input("Module & User License", value="", key="module_license")
-
-        # Report Selection
-        st.subheader("4. Report Templates")
-        selected_reports = []
-        for report in REPORT_OPTIONS:
+    
+    vpn_info = st.text_input("VPN Information", value="", key="vpn_info")
+    module_license = st.text_input("Module & User License", value="", key="module_license")
+    
+    # Report Selection
+    st.markdown("---")
+    st.subheader("Report Templates")
+    selected_reports = []
+    report_cols = st.columns(2)
+    for i, report in enumerate(REPORT_OPTIONS):
+        with report_cols[i % 2]:
             if st.checkbox(report, key=f"report_{report}"):
                 selected_reports.append(report)
-
-    # Migration Information (Full Width)
-    st.subheader("5. Migration Details")
-    migration_cols = st.columns(2)
-    with migration_cols[0]:
-        migration_master = st.text_input("Migration Master Data", value="", key="migration_master")
-    with migration_cols[1]:
-        migration_outstanding = st.text_input("Outstanding Balance", value="", key="migration_outstanding")
-
-    # Status (Full Width)
-    st.subheader("6. Status")
+    
+    # Migration Information
+    st.markdown("---")
+    st.subheader("Migration Details")
+    migration_master = st.text_input("Migration Master Data", value="", key="migration_master")
+    migration_outstanding = st.text_input("Migration Outstanding Balance", value="", key="migration_outstanding")
+    
+    # Status
+    st.markdown("---")
+    st.subheader("Status")
     status = st.selectbox("Current Status", [""] + STATUS_OPTIONS, key="status")
+    
+    st.markdown("---")
 
     # Save Button
     if st.button("Save Record", use_container_width=True):
