@@ -10,6 +10,15 @@ PLUGIN_OPTIONS = [
     "Doc Control Plugin"
 ]
 
+# Report options
+REPORT_OPTIONS = [
+    "Sales Report",
+    "Purchase Report",
+    "Stock Report",
+    "Financial Report",
+    "GST Report"
+]
+
 # Implementation options
 IMPLEMENTATION_OPTIONS = [
     "SALES ORDER",
