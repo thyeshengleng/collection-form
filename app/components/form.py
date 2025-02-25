@@ -60,9 +60,37 @@ def render_create_form():
     
     # Company Information
     st.markdown("---")
-    st.subheader("Company Information")
-    company_name = st.text_input("Company Name*", value="", key="company_name")
-    email = st.text_input("Email*", value="", key="email")
+    st.subheader("A. COMPANY INFORMATION")
+    
+    # Create a table-like structure with columns
+    col_desc, col_details, col_status, col_file, col_date = st.columns([2, 3, 1, 1, 1])
+    
+    with col_desc:
+        st.write("ACTION DESCRIPTION")
+    with col_details:
+        st.write("DETAILS")
+    with col_status:
+        st.write("STATUS")
+    with col_file:
+        st.write("FILE RECEIVE")
+    with col_date:
+        st.write("DATE COLLECT")
+    
+    # Company Information Fields
+    company_name = st.text_input("1. COMPANY NAME:", value="", key="company_name")
+    company_email = st.text_input("2. COMPANY EMAIL:", value="", key="company_email")
+    company_address = st.text_area("3. COMPANY ADDRESS:", value="", key="company_address")
+    company_phone = st.text_input("4. COMPANY PHONE:", value="", key="company_phone")
+    tin_number = st.text_input("5. TIN NUMBER:", value="", key="tin_number")
+    msic_code = st.text_input("6. MSIC CODE:", value="", key="msic_code")
+    nature_of_business = st.text_input("7. NATURE OF BUSINESS:", value="", key="nature_of_business")
+    roc_number = st.text_input("8. ROC REG. NUMBER:", value="", key="roc_number")
+    pic_name = st.text_input("9. PIC NAME:", value="", key="pic_name")
+    pic_phone = st.text_input("10. PIC PHONE:", value="", key="pic_phone")
+    financial_year = st.text_input("11. FINANCIAL YEAR:", value="", key="financial_year")
+    e_invoice_start_date = st.date_input("12. E-INVOICE START DATE:", value=None, key="e_invoice_start_date")
+    existing_software = st.text_input("13. EXISTING OLD SOFTWARE (SQL,MILLION,UBS):", value="", key="existing_software")
+    
     address = st.text_area("Address", value="", key="address")
     business_info = st.text_input("Business Info", value="", key="business_info")
     tax_id = st.text_input("Tax ID", value="", key="tax_id")
