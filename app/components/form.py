@@ -136,8 +136,8 @@ def render_create_form():
     }
     
     for option in MASTER_DATA_OPTIONS:
-        st.write(f"{option} {descriptions[option]}")
-        master_data[f"{option}_data"] = st.text_input(option, key=f"master_data_{option}")
+        st.write(f"{option}: {descriptions[option]}")
+        master_data[option] = st.text_input(f"Upload {option}", key=f"master_data_{option}")
         st.markdown("<hr style='margin: 10px 0px'>", unsafe_allow_html=True)
     
     # Migration Section
