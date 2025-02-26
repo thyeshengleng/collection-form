@@ -118,10 +118,16 @@ def render_create_form():
     st.subheader("B. IMPLEMENTATION")
     st.write("(Kindly provide us your existing or desired A4/A5 Letter Format)")
     
-    implementation_counter = 1
-    for option in IMPLEMENTATION_OPTIONS:
-        st.text_input(f"{implementation_counter}. {option} DOCUMENT NUMBERING FORMAT:", key=f"impl_{option}")
-        implementation_counter += 1
+    # Document Numbering Format Fields
+    st.text_input("1. SALES ORDER DOCUMENT NUMBERING FORMAT:", key="impl_sales_order")
+    st.text_input("2. DELIVERY ORDER DOCUMENT NUMBERING FORMAT:", key="impl_delivery_order")
+    st.text_input("3. SALES INVOICE DOCUMENT NUMBERING FORMAT:", key="impl_sales_invoice")
+    st.text_input("4. PICKING LIST DOCUMENT NUMBERING FORMAT:", key="impl_picking_list")
+    st.text_input("5. PURCHASE ORDER DOCUMENT NUMBERING FORMAT:", key="impl_purchase_order")
+    st.text_input("6. CASH SALES DOCUMENT NUMBERING FORMAT:", key="impl_cash_sales")
+    st.text_input("7. QUOTATION DOCUMENT NUMBERING FORMAT:", key="impl_quotation")
+    st.text_input("8. OFFICIAL RECEIPT DOCUMENT NUMBERING FORMAT:", key="impl_official_receipt")
+    st.text_input("9. PAYMENT VOUCHER DOCUMENT NUMBERING FORMAT:", key="impl_payment_voucher")
     
     # Master Data Section
     st.markdown("---")
