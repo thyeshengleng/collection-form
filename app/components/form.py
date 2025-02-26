@@ -118,35 +118,34 @@ def render_create_form():
     st.subheader("B. IMPLEMENTATION")
     st.write("(Kindly provide us your existing or desired A4/A5 Letter Format)")
     
-    implementation_data = {}
+    implementation_counter = 1
     for option in IMPLEMENTATION_OPTIONS:
-        implementation_data[option] = st.text_input(f"{option} Document Numbering Format:", key=f"impl_{option}")
+        st.text_input(f"{implementation_counter}. {option} DOCUMENT NUMBERING FORMAT:", key=f"impl_{option}")
+        implementation_counter += 1
     
     # Master Data Section
     st.markdown("---")
     st.subheader("C. MASTER DATA")
     st.write("(Kindly provide us below data in excel format!)")
     
-    master_data = {}
-    descriptions = {
-        "CHART OF ACCOUNT": "(Your COA # only/Autoccount COA standard template)",
-        "DEBTOR": "(Your List of Customer)",
-        "CREDITOR": "(Your List of Supplier)",
-        "STOCK ITEM": "(Your List of Items/Products)"
+    master_data_descriptions = {
+        "CHART OF ACCOUNT": "Your COA # only/Autoccount COA standard template",
+        "DEBTOR": "Your List of Customer",
+        "CREDITOR": "Your List of Supplier",
+        "STOCK ITEM": "Your List of Items/Products"
     }
     
+    master_data_counter = 1
     for option in MASTER_DATA_OPTIONS:
-        # st.write(f"{option}: {descriptions[option]}")
-        master_data[option] = st.text_input(option, key=f"master_data_{option}")
-        st.markdown("<hr style='margin: 10px 0px'>", unsafe_allow_html=True)
+        st.text_input(f"{master_data_counter}. {option}: ({master_data_descriptions[option]}):", key=f"master_data_{option}")
+        master_data_counter += 1
     
     # Migration Section
     st.markdown("---")
     st.subheader("D. MIGRATION")
     st.write("(Kindly provide us outstanding data in excel format!)")
     
-    migration_data = {}
-    descriptions = {
+    migration_descriptions = {
         "DEBTOR AGING": "Outstanding Debtor Invoice ,OR, CN, DN",
         "CREDITOR AGING": "Outstanding Creditor Invoice ,PV, CN, DN",
         "TRIAL BALANCE REPORT": "For Account Opening Purpose",
@@ -155,10 +154,10 @@ def render_create_form():
         "SO/PO OUTSTANDING": "Outstanding SO/PO by Item, and amount"
     }
     
+    migration_counter = 1
     for option in MIGRATION_OPTIONS:
-        st.write(f"{option}: {descriptions[option]}")
-        migration_data[option] = st.text_input("", key=f"migration_{option}")
-        st.markdown("<hr style='margin: 10px 0px'>", unsafe_allow_html=True)
+        st.text_input(f"{migration_counter}. {option}: ({migration_descriptions[option]}):", key=f"migration_{option}")
+        migration_counter += 1
     
     # Status
     st.markdown("---")
