@@ -1,6 +1,6 @@
 import streamlit as st
 from datetime import datetime
-from app.config.settings import PLUGIN_OPTIONS, REPORT_OPTIONS, STATUS_OPTIONS, IMPLEMENTATION_OPTIONS, MASTER_DATA_OPTIONS
+from app.config.settings import PLUGIN_OPTIONS, REPORT_OPTIONS, STATUS_OPTIONS, IMPLEMENTATION_OPTIONS, MASTER_DATA_OPTIONS, MIGRATION_OPTIONS
 from app.utils.database import create_record
 
 def handle_form_submit(new_user, existing_user, company_name, company_email, company_address,
