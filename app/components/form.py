@@ -156,11 +156,9 @@ def render_create_form():
     }
     
     for option in MIGRATION_OPTIONS:
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            st.write(f"{option}: {descriptions[option]}")
-        with col2:
-            migration_data[option] = st.checkbox("", key=f"migration_{option}")
+        st.write(f"{option}: {descriptions[option]}")
+        migration_data[option] = st.text_input("", key=f"migration_{option}")
+        st.markdown("<hr style='margin: 10px 0px'>", unsafe_allow_html=True)
     
     # Status
     st.markdown("---")
