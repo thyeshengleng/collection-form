@@ -134,36 +134,22 @@ def render_create_form():
     st.subheader("C. MASTER DATA")
     st.write("(Kindly provide us below data in excel format!)")
     
-    master_data_descriptions = {
-        "CHART OF ACCOUNT": "Your COA # only/Autoccount COA standard template",
-        "DEBTOR": "Your List of Customer",
-        "CREDITOR": "Your List of Supplier",
-        "STOCK ITEM": "Your List of Items/Products"
-    }
-    
-    master_data_counter = 1
-    for option in MASTER_DATA_OPTIONS:
-        st.text_input(f"{master_data_counter}. {option}: ({master_data_descriptions[option]}):", key=f"master_data_{option}")
-        master_data_counter += 1
+    migration_master = st.text_area("1. CHART OF ACCOUNT: (Your COA # only/Autoccount COA standard template)")
+    st.text_area("2. DEBTOR: (Your List of Customer)")
+    st.text_area("3. CREDITOR: (Your List of Supplier)")
+    st.text_area("4. STOCK ITEM: (Your List of Items/Products)")
     
     # Migration Section
     st.markdown("---")
     st.subheader("D. MIGRATION")
     st.write("(Kindly provide us outstanding data in excel format!)")
     
-    migration_descriptions = {
-        "DEBTOR AGING": "Outstanding Debtor Invoice ,OR, CN, DN",
-        "CREDITOR AGING": "Outstanding Creditor Invoice ,PV, CN, DN",
-        "TRIAL BALANCE REPORT": "For Account Opening Purpose",
-        "BALANCE SHEET REPORT": "For Account Opening Purpose",
-        "STOCK BALANCE": "For Item Opening Balance Purpose",
-        "SO/PO OUTSTANDING": "Outstanding SO/PO by Item, and amount"
-    }
-    
-    migration_counter = 1
-    for option in MIGRATION_OPTIONS:
-        st.text_input(f"{migration_counter}. {option}: ({migration_descriptions[option]}):", key=f"migration_{option}")
-        migration_counter += 1
+    migration_outstanding = st.text_area("1. DEBTOR AGING: (Outstanding Debtor Invoice, OR, CN, DN)")
+    st.text_area("2. CREDITOR AGING: (Outstanding Creditor Invoice, PV, CN, DN)")
+    st.text_area("3. TRIAL BALANCE REPORT: (For Account Opening Purpose)")
+    st.text_area("4. BALANCE SHEET REPORT: (For Account Opening Purpose)")
+    st.text_area("5. STOCK BALANCE: (For Item Opening Balance Purpose)")
+    st.text_area("6. SO/PO OUTSTANDING: (Outstanding SO/PO by Item, and amount)")
     
     # Status
     st.markdown("---")
