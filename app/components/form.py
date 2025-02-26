@@ -137,11 +137,7 @@ def render_create_form():
     
     for option in MASTER_DATA_OPTIONS:
         st.write(f"{option} {descriptions[option]}")
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            master_data[f"{option}_data"] = st.text_input(f"{option} Data", key=f"master_data_{option}")
-        with col2:
-            master_data[f"{option}_status"] = st.checkbox("Received", key=f"master_status_{option}")
+        master_data[f"{option}_data"] = st.text_input(f"{option} Data", key=f"master_data_{option}")
         st.markdown("<hr style='margin: 10px 0px'>", unsafe_allow_html=True)
     
     # Migration Section
