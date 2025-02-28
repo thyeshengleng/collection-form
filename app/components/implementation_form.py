@@ -1,61 +1,88 @@
 import streamlit as st
 
 def render_implementation_form():
-    st.subheader("Install & Implementation Form")
+    st.title("INSTALLATION & IMPLEMENTATION CHECK LIST")
     
-    # Project Information
-    st.markdown("### Project Information")
-    project_name = st.text_input("Project Name")
-    start_date = st.date_input("Project Start Date")
-    end_date = st.date_input("Expected End Date")
+    # Company Information
+    col1, col2 = st.columns(2)
+    with col1:
+        company_name = st.text_input("COMPANY NAME")
+        module = st.text_input("AUTOCOUNT MODULE")
+        start_date = st.date_input("ACTUAL START DATE")
+    with col2:
+        training_date = st.date_input("TRAINING DATE")
+        complete_date = st.date_input("ESTIMATED COMPLETE DATE")
+        job_assigned = st.text_input("JOB ASSIGNED")
     
-    # Implementation Team
-    st.markdown("### Implementation Team")
-    project_manager = st.text_input("Project Manager")
-    team_members = st.text_area("Team Members")
+    # Create a table-like structure
+    st.markdown("### Installation & Implementation Progress")
     
-    # Implementation Phases
-    st.markdown("### Implementation Phases")
+    # Table headers
+    cols = st.columns([1, 4, 2, 2, 2])
+    with cols[0]:
+        st.markdown("**STEP**")
+    with cols[1]:
+        st.markdown("**SERVICE DESCRIPTION**")
+    with cols[2]:
+        st.markdown("**VERSION/NAME**")
+    with cols[3]:
+        st.markdown("**STATUS**")
+    with cols[4]:
+        st.markdown("**DATE COMPLETE**")
     
-    # Phase 1: System Setup
-    st.subheader("Phase 1: System Setup")
-    system_setup_status = st.selectbox(
-        "System Setup Status",
-        ["Not Started", "In Progress", "Completed"],
-        key="system_setup"
-    )
-    system_setup_notes = st.text_area("System Setup Notes")
+    st.markdown("#### INSTALLATION:")
     
-    # Phase 2: Data Migration
-    st.subheader("Phase 2: Data Migration")
-    data_migration_status = st.selectbox(
-        "Data Migration Status",
-        ["Not Started", "In Progress", "Completed"],
-        key="data_migration"
-    )
-    migration_notes = st.text_area("Data Migration Notes")
+    # Installation steps
+    installation_steps = [
+        (1, "AUTOCOUNT SYSTEM", "V2.2 (REV17)"),
+        (2, "AUTOCOUNT CLIENT PC", "V.2.2 (REV17)"),
+        (3, "ZEROTIER / RADMIN", "ZEROTIRE 1.3/SLLSVR"),
+        (4, "SQL SERVER", "SQL 2022"),
+        (5, "LICENSE ACTIVATION", "3 USERS")
+    ]
     
-    # Phase 3: User Training
-    st.subheader("Phase 3: User Training")
-    training_status = st.selectbox(
-        "Training Status",
-        ["Not Started", "In Progress", "Completed"],
-        key="training"
-    )
-    training_notes = st.text_area("Training Notes")
+    for step, desc, version in installation_steps:
+        cols = st.columns([1, 4, 2, 2, 2])
+        with cols[0]:
+            st.write(step)
+        with cols[1]:
+            st.write(desc)
+        with cols[2]:
+            st.write(version)
+        with cols[3]:
+            status = st.selectbox(
+                "",
+                ["PENDING", "ERROR", "DONE"],
+                key=f"status_{step}"
+            )
+        with cols[4]:
+            date = st.date_input("", key=f"date_{step}")
     
-    # Phase 4: User Acceptance Testing
-    st.subheader("Phase 4: User Acceptance Testing")
-    uat_status = st.selectbox(
-        "UAT Status",
-        ["Not Started", "In Progress", "Completed"],
-        key="uat"
-    )
-    uat_notes = st.text_area("UAT Notes")
+    st.markdown("#### IMPLEMENTATION:")
     
-    # Additional Information
-    st.markdown("### Additional Information")
-    additional_notes = st.text_area("Additional Notes")
+    # Implementation steps
+    implementation_steps = [
+        (6, "DATABASE INSTANT NAME", "SLL.AED"),
+        (7, "SETUP COMPANY PROFILE / LOGO / HEADER", ""),
+        (8, "SETUP CHART OF ACCOUNT", "")
+    ]
+    
+    for step, desc, version in implementation_steps:
+        cols = st.columns([1, 4, 2, 2, 2])
+        with cols[0]:
+            st.write(step)
+        with cols[1]:
+            st.write(desc)
+        with cols[2]:
+            st.write(version)
+        with cols[3]:
+            status = st.selectbox(
+                "",
+                ["PENDING", "ERROR", "DONE"],
+                key=f"status_{step}"
+            )
+        with cols[4]:
+            date = st.date_input("", key=f"date_{step}")
     
     # Submit Button
     if st.button("Submit Implementation Form", use_container_width=True):
