@@ -94,6 +94,13 @@ def render_create_form():
     st.subheader("Module Information")
     st.write("Please specify the required modules:")
     
+    # Autocount Module Edition selection
+    module_edition = st.selectbox(
+        "Autocount Module Edition",
+        ["", "Account Plus", "Express Plus", "Basic Edition", "Pro Edition", "Premium Edition"],
+        key="module_edition"
+    )
+    
     # Convert checkboxes to text inputs for more flexibility
     st.text_area("Plug-in Modules Required:", help="Enter each module on a new line", key="plugins_text")
     selected_plugins = [plugin.strip() for plugin in st.session_state.get("plugins_text", "").split("\n") if plugin.strip()]
@@ -128,7 +135,7 @@ def render_create_form():
     st.markdown("---")
     st.subheader("C. MASTER DATA")
     st.write("(Kindly provide us below data in excel format!)")
-    migration_master = st.selectbox("1. CHART OF ACCOUNT: (Your COA # only/Autoccount COA standard template)", [" ", "None", "Done"], key="master_coa")
+    migration_master = st.selectbox("1. CHART OF ACCOUNT: (Your COA # only/Autoccount COA standard template)", [" ", "None", "Done", "Standard"], key="master_coa")
     st.selectbox("2. DEBTOR: (Your List of Customer)", [" ", "None", "Done"], key="master_debtor")
     st.selectbox("3. CREDITOR: (Your List of Supplier)", [" ", "None", "Done"], key="master_creditor")
     st.selectbox("4. STOCK ITEM: (Your List of Items/Products)", [" ", "None", "Done"], key="master_stock")
@@ -138,12 +145,12 @@ def render_create_form():
     st.subheader("D. MIGRATION")
     st.write("(Kindly provide us outstanding data in excel format!)")
     
-    migration_outstanding = st.text_area("1. DEBTOR AGING: (Outstanding Debtor Invoice, OR, CN, DN)")
-    st.text_area("2. CREDITOR AGING: (Outstanding Creditor Invoice, PV, CN, DN)")
-    st.text_area("3. TRIAL BALANCE REPORT: (For Account Opening Purpose)")
-    st.text_area("4. BALANCE SHEET REPORT: (For Account Opening Purpose)")
-    st.text_area("5. STOCK BALANCE: (For Item Opening Balance Purpose)")
-    st.text_area("6. SO/PO OUTSTANDING: (Outstanding SO/PO by Item, and amount)")
+    migration_outstanding = st.selectbox("1. DEBTOR AGING: (Outstanding Debtor Invoice, OR, CN, DN)", [" ", "None", "Done"])
+    st.selectbox("2. CREDITOR AGING: (Outstanding Creditor Invoice, PV, CN, DN)", [" ", "None", "Done"])
+    st.selectbox("3. TRIAL BALANCE REPORT: (For Account Opening Purpose)", [" ", "None", "Done"])
+    st.selectbox("4. BALANCE SHEET REPORT: (For Account Opening Purpose)", [" ", "None", "Done"])
+    st.selectbox("5. STOCK BALANCE: (For Item Opening Balance Purpose)", [" ", "None", "Done"])
+    st.selectbox("6. SO/PO OUTSTANDING: (Outstanding SO/PO by Item, and amount)", [" ", "None", "Done"])
     
     # Status
     st.markdown("---")
