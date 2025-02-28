@@ -20,7 +20,7 @@ def handle_form_submit(new_user, existing_user, company_name, company_email, com
 
     # Create form data dictionary
     form_data = {
-        "User Type": "New User" if new_user else "Existing User",
+        "User Type": "New User" if new_user else ("Existing User" if existing_user else "Upgrade User"),
         "Company Name": company_name,
         "Company Email": company_email,
         "Company Address": company_address,
@@ -58,13 +58,15 @@ def render_create_form():
     
     # User Type Selection
     st.subheader("User Type")
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
         new_user = st.checkbox("New User")
     with col2:
         existing_user = st.checkbox("Existing User")
+    with col3:
+        upgrade_user = st.checkbox("Upgrade User")
 
-    if st.session_state.form_submitted and not (new_user or existing_user):
+    if st.session_state.form_submitted and not (new_user or existing_user or upgrade_user):
         st.error("Please select a user type")
     
     # Company Information
