@@ -207,7 +207,7 @@ def main():
     # CRUD Mode Selection
     crud_mode = st.radio(
         "Select Operation",
-        ["Database Connection", "Create New Record", "View/Edit Records"],
+        ["Database Connection", "Create New Record", "View/Edit Records", "Install & Implementation"],
         horizontal=True
     )
 
@@ -215,6 +215,8 @@ def main():
         render_db_form()
     elif crud_mode == "Create New Record":
         render_create_form()
+    elif crud_mode == "Install & Implementation":
+        st.info("Install & Implementation form is under development")
     else:  # View/Edit Records
         df, edited_df = render_records_table()
         if df is not None and edited_df is not None:
