@@ -92,26 +92,21 @@ def render_create_form():
     # Module Information
     st.markdown("---")
     st.subheader("Module Information")
-    st.write("Plug-in Modules:")
-    selected_plugins = []
-    cols = st.columns(3)
-    for i, plugin in enumerate(PLUGIN_OPTIONS):
-        with cols[i % 3]:
-            if st.checkbox(plugin, key=f"plugin_{plugin}"):
-                selected_plugins.append(plugin)
+    st.write("Please specify the required modules:")
+    
+    # Convert checkboxes to text inputs for more flexibility
+    st.text_area("Plug-in Modules Required:", help="Enter each module on a new line", key="plugins_text")
+    selected_plugins = [plugin.strip() for plugin in st.session_state.get("plugins_text", "").split("\n") if plugin.strip()]
     
     vpn_info = st.text_input("VPN Information", value="", key="vpn_info")
     module_license = st.text_input("Module & User License", value="", key="module_license")
     
-    # Report Selection
+    # Report Templates
     st.markdown("---")
     st.subheader("Report Templates")
-    selected_reports = []
-    report_cols = st.columns(2)
-    for i, report in enumerate(REPORT_OPTIONS):
-        with report_cols[i % 2]:
-            if st.checkbox(report, key=f"report_{report}"):
-                selected_reports.append(report)
+    st.write("Please specify the required report templates:")
+    st.text_area("Report Templates Required:", help="Enter each template on a new line", key="reports_text")
+    selected_reports = [report.strip() for report in st.session_state.get("reports_text", "").split("\n") if report.strip()]
     
     # Implementation Section
     st.markdown("---")
