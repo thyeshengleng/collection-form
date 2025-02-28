@@ -129,10 +129,10 @@ def render_create_form():
     st.subheader("C. MASTER DATA")
     st.write("(Kindly provide us below data in excel format!)")
     
-    migration_master = st.text_area("1. CHART OF ACCOUNT: (Your COA # only/Autoccount COA standard template)")
-    st.text_area("2. DEBTOR: (Your List of Customer)")
-    st.text_area("3. CREDITOR: (Your List of Supplier)")
-    st.text_area("4. STOCK ITEM: (Your List of Items/Products)")
+    migration_master = st.selectbox("1. CHART OF ACCOUNT: (Your COA # only/Autoccount COA standard template)", ["Not yet", "Done"], key="master_coa")
+    st.selectbox("2. DEBTOR: (Your List of Customer)", ["Not yet", "Done"], key="master_debtor")
+    st.selectbox("3. CREDITOR: (Your List of Supplier)", ["Not yet", "Done"], key="master_creditor")
+    st.selectbox("4. STOCK ITEM: (Your List of Items/Products)", ["Not yet", "Done"], key="master_stock")
     
     # Migration Section
     st.markdown("---")
