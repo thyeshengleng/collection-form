@@ -100,6 +100,11 @@ def render_create_form():
         key="module_edition"
     )
     
+    module_remark = st.text_input(
+        "Remark",
+        key="module_remark"
+    )
+    
     # Plugin selection using checkboxes
     st.write("Select Plugin Modules:")
     selected_plugins = []
