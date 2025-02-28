@@ -101,9 +101,12 @@ def render_create_form():
         key="module_edition"
     )
     
-    # Convert checkboxes to text inputs for more flexibility
-    st.text_area("Plug-in Modules Required:", help="Enter each module on a new line", key="plugins_text")
-    selected_plugins = [plugin.strip() for plugin in st.session_state.get("plugins_text", "").split("\n") if plugin.strip()]
+    # Plugin selection using checkboxes
+    st.write("Select Plugin Modules:")
+    selected_plugins = []
+    for plugin in PLUGIN_OPTIONS:
+        if st.checkbox(plugin, key=f"plugin_{plugin}"):
+            selected_plugins.append(plugin)
     
     vpn_info = st.text_input("VPN Information", value="", key="vpn_info")
     module_license = st.text_input("Module & User License", value="", key="module_license")
