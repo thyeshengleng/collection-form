@@ -7,8 +7,7 @@ def handle_form_submit(new_user, existing_user, company_name, company_email, com
                       company_phone, tin_number, msic_code, nature_of_business,
                       roc_number, pic_name, pic_phone, financial_year,
                       e_invoice_start_date, existing_software, selected_plugins,
-                      vpn_info, module_license, selected_reports, migration_master,
-                      migration_outstanding, status):
+                      selected_reports, migration_master, migration_outstanding, status):
     # Validate required fields
     if not (new_user or existing_user):
         st.error("Please select a user type")
@@ -35,8 +34,6 @@ def handle_form_submit(new_user, existing_user, company_name, company_email, com
         "E-Invoice Start Date": e_invoice_start_date.strftime("%Y-%m-%d") if e_invoice_start_date else "",
         "Existing Software": existing_software,
         "Plug In Module": ", ".join(selected_plugins),
-        "VPN Info": vpn_info,
-        "Module & User License": module_license,
         "Report Design Template": ", ".join(selected_reports),
         "Migration Master Data": migration_master,
         "Migration Outstanding Balance": migration_outstanding,
@@ -110,9 +107,6 @@ def render_create_form():
         if st.checkbox(plugin, key=f"plugin_{plugin}"):
             selected_plugins.append(plugin)
     
-    vpn_info = st.text_input("VPN Information", value="", key="vpn_info")
-    module_license = st.text_input("Module & User License", value="", key="module_license")
-    
     # Report Templates
     st.markdown("---")
     st.subheader("Report Templates")
@@ -171,7 +165,6 @@ def render_create_form():
             company_phone, tin_number, msic_code, nature_of_business,
             roc_number, pic_name, pic_phone, financial_year,
             e_invoice_start_date, existing_software, selected_plugins,
-            vpn_info, module_license, selected_reports, migration_master,
-            migration_outstanding, status
+            selected_reports, migration_master, migration_outstanding, status
         )
     return None
