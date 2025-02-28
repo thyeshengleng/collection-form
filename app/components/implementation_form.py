@@ -34,21 +34,21 @@ def render_implementation_form():
     
     # Installation steps
     installation_steps = [
-        (1, "AUTOCOUNT SYSTEM", "V2.2 (REV17)"),
-        (2, "AUTOCOUNT CLIENT PC", "V.2.2 (REV17)"),
-        (3, "ZEROTIER / RADMIN", "ZEROTIRE 1.3/SLLSVR"),
-        (4, "SQL SERVER", "SQL 2022"),
-        (5, "LICENSE ACTIVATION", "3 USERS")
+        (1, "AUTOCOUNT SYSTEM"),
+        (2, "AUTOCOUNT CLIENT PC"),
+        (3, "ZEROTIER / RADMIN"),
+        (4, "SQL SERVER"),
+        (5, "LICENSE ACTIVATION")
     ]
     
-    for step, desc, version in installation_steps:
+    for step, desc in installation_steps:
         cols = st.columns([1, 4, 2, 2, 2])
         with cols[0]:
             st.write(step)
         with cols[1]:
             st.write(desc)
         with cols[2]:
-            st.write(version)
+            version = st.text_input("", key=f"version_{step}")
         with cols[3]:
             status = st.selectbox(
                 "",
@@ -57,24 +57,25 @@ def render_implementation_form():
             )
         with cols[4]:
             date = st.date_input("", key=f"date_{step}")
+
     
     st.markdown("#### IMPLEMENTATION:")
     
     # Implementation steps
     implementation_steps = [
-        (6, "DATABASE INSTANT NAME", "SLL.AED"),
-        (7, "SETUP COMPANY PROFILE / LOGO / HEADER", ""),
-        (8, "SETUP CHART OF ACCOUNT", "")
+        (6, "DATABASE INSTANT NAME"),
+        (7, "SETUP COMPANY PROFILE / LOGO / HEADER"),
+        (8, "SETUP CHART OF ACCOUNT")
     ]
     
-    for step, desc, version in implementation_steps:
+    for step, desc in implementation_steps:
         cols = st.columns([1, 4, 2, 2, 2])
         with cols[0]:
             st.write(step)
         with cols[1]:
             st.write(desc)
         with cols[2]:
-            st.write(version)
+            version = st.text_input("", key=f"version_{step}")
         with cols[3]:
             status = st.selectbox(
                 "",
