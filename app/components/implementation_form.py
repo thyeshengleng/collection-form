@@ -1,8 +1,6 @@
 import streamlit as st
 
 def render_implementation_form():
-    st.title("INSTALLATION & IMPLEMENTATION CHECK LIST")
-    
     # Company Information
     col1, col2 = st.columns(2)
     with col1:
@@ -16,19 +14,6 @@ def render_implementation_form():
     
     # Create a table-like structure
     st.markdown("### Installation & Implementation Progress")
-    
-    # Table headers
-    cols = st.columns([1, 4, 2, 2, 2])
-    with cols[0]:
-        st.markdown("**STEP**")
-    with cols[1]:
-        st.markdown("**SERVICE DESCRIPTION**")
-    with cols[2]:
-        st.markdown("**VERSION/NAME**")
-    with cols[3]:
-        st.markdown("**STATUS**")
-    with cols[4]:
-        st.markdown("**DATE COMPLETE**")
     
     st.markdown("#### INSTALLATION:")
     
