@@ -216,7 +216,8 @@ def main():
     elif crud_mode == "Create New Record":
         render_create_form()
     elif crud_mode == "Install & Implementation":
-        st.info("Install & Implementation form is under development")
+        from app.components.implementation_form import render_implementation_form
+        render_implementation_form()
     else:  # View/Edit Records
         df, edited_df = render_records_table()
         if df is not None and edited_df is not None:
