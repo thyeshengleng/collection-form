@@ -2,12 +2,12 @@ import streamlit as st
 
 def render_implementation_form():
     # Company Information
-    company_name = st.text_input("COMPANY NAME", key="company_name", use_container_width=True)
-    module = st.text_input("AUTOCOUNT MODULE", key="module", use_container_width=True)
+    company_name = st.text_input("COMPANY NAME")
+    module = st.text_input("AUTOCOUNT MODULE")
     start_date = st.date_input("ACTUAL START DATE")
     training_date = st.date_input("TRAINING DATE")
     complete_date = st.date_input("ESTIMATED COMPLETE DATE")
-    job_assigned = st.text_input("JOB ASSIGNED", key="job_assigned", use_container_width=True)
+    job_assigned = st.text_input("JOB ASSIGNED")
     
     # Create a table-like structure
     st.markdown("### Installation & Implementation Progress")
@@ -25,7 +25,7 @@ def render_implementation_form():
     
     for step, desc in installation_steps:
         st.markdown(f"**{step}. {desc}**")
-        version = st.text_input("Version/Name", key=f"version_{step}", use_container_width=True)
+        version = st.text_input("Version/Name", key=f"version_{step}")
         status = st.selectbox(
             "Status",
             ["PENDING", "ERROR", "DONE"],
@@ -46,7 +46,7 @@ def render_implementation_form():
     
     for step, desc in implementation_steps:
         st.markdown(f"**{step}. {desc}**")
-        version = st.text_input("Version/Name", key=f"version_{step}", use_container_width=True)
+        version = st.text_input("Version/Name", key=f"version_{step}")
         status = st.selectbox(
             "Status",
             ["PENDING", "ERROR", "DONE"],
