@@ -18,14 +18,22 @@ def render_implementation_form():
     installation_steps = [
         (1, "AUTOCOUNT SYSTEM"),
         (2, "AUTOCOUNT CLIENT PC"),
-        (3, "ZEROTIER / RADMIN"),
+        (3, "VPN"),
         (4, "SQL SERVER"),
         (5, "LICENSE ACTIVATION")
     ]
     
     for step, desc in installation_steps:
         st.markdown(f"**{step}. {desc}**")
-        version = st.text_input("Version/Name", key=f"version_{step}")
+        # Special handling for VPN step
+        if step == 3:  # VPN step
+            version = st.selectbox(
+                "VPN Name",
+                ["ZEROTIER", "RADMIN"],
+                key=f"version_{step}"
+            )
+        else:
+            version = st.text_input("Version/Name", key=f"version_{step}")
         status = st.selectbox(
             "Status",
             ["PENDING", "ERROR", "DONE"],
@@ -46,7 +54,15 @@ def render_implementation_form():
     
     for step, desc in implementation_steps:
         st.markdown(f"**{step}. {desc}**")
-        version = st.text_input("Version/Name", key=f"version_{step}")
+        # Special handling for VPN step
+        if step == 3:  # VPN step
+            version = st.selectbox(
+                "VPN Name",
+                ["ZEROTIER", "RADMIN"],
+                key=f"version_{step}"
+            )
+        else:
+            version = st.text_input("Version/Name", key=f"version_{step}")
         status = st.selectbox(
             "Status",
             ["PENDING", "ERROR", "DONE"],
