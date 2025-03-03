@@ -2,15 +2,12 @@ import streamlit as st
 
 def render_implementation_form():
     # Company Information
-    col1, col2 = st.columns(2)
-    with col1:
-        company_name = st.text_input("COMPANY NAME")
-        module = st.text_input("AUTOCOUNT MODULE")
-        start_date = st.date_input("ACTUAL START DATE")
-    with col2:
-        training_date = st.date_input("TRAINING DATE")
-        complete_date = st.date_input("ESTIMATED COMPLETE DATE")
-        job_assigned = st.text_input("JOB ASSIGNED")
+    company_name = st.text_input("COMPANY NAME")
+    module = st.text_input("AUTOCOUNT MODULE")
+    start_date = st.date_input("ACTUAL START DATE")
+    training_date = st.date_input("TRAINING DATE")
+    complete_date = st.date_input("ESTIMATED COMPLETE DATE")
+    job_assigned = st.text_input("JOB ASSIGNED")
     
     # Create a table-like structure
     st.markdown("### Installation & Implementation Progress")
@@ -27,21 +24,15 @@ def render_implementation_form():
     ]
     
     for step, desc in installation_steps:
-        cols = st.columns([1, 4, 2, 2, 2])
-        with cols[0]:
-            st.write(step)
-        with cols[1]:
-            st.write(desc)
-        with cols[2]:
-            version = st.text_input("", key=f"version_{step}")
-        with cols[3]:
-            status = st.selectbox(
-                "",
-                ["PENDING", "ERROR", "DONE"],
-                key=f"status_{step}"
-            )
-        with cols[4]:
-            date = st.date_input("", key=f"date_{step}")
+        st.markdown(f"**{step}. {desc}**")
+        version = st.text_input("Version/Name", key=f"version_{step}")
+        status = st.selectbox(
+            "Status",
+            ["PENDING", "ERROR", "DONE"],
+            key=f"status_{step}"
+        )
+        date = st.date_input("Completion Date", key=f"date_{step}")
+        st.divider()
 
     
     st.markdown("#### IMPLEMENTATION:")
@@ -54,21 +45,15 @@ def render_implementation_form():
     ]
     
     for step, desc in implementation_steps:
-        cols = st.columns([1, 4, 2, 2, 2])
-        with cols[0]:
-            st.write(step)
-        with cols[1]:
-            st.write(desc)
-        with cols[2]:
-            version = st.text_input("", key=f"version_{step}")
-        with cols[3]:
-            status = st.selectbox(
-                "",
-                ["PENDING", "ERROR", "DONE"],
-                key=f"status_{step}"
-            )
-        with cols[4]:
-            date = st.date_input("", key=f"date_{step}")
+        st.markdown(f"**{step}. {desc}**")
+        version = st.text_input("Version/Name", key=f"version_{step}")
+        status = st.selectbox(
+            "Status",
+            ["PENDING", "ERROR", "DONE"],
+            key=f"status_{step}"
+        )
+        date = st.date_input("Completion Date", key=f"date_{step}")
+        st.divider()
     
     # Submit Button
     if st.button("Submit Implementation Form", use_container_width=True):
