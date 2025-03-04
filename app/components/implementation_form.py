@@ -210,6 +210,26 @@ def render_implementation_form():
         date = st.date_input("Completion Date", key=f"date_{step}")
         st.divider()
     
+    # TRAINING section
+    st.markdown("#### TRAINING:")
+    
+    # Training steps
+    training_steps = [
+        (32, "ACCOUNT"),
+        (33, "STOCK"),
+        (34, "PLUG IN")
+    ]
+    
+    for step, desc in training_steps:
+        st.markdown(f"**{step}. {desc}**")
+        status = st.selectbox(
+            "Status",
+            ["PENDING", "DONE", "NONE"],
+            key=f"status_{step}"
+        )
+        date = st.date_input("Completion Date", key=f"date_{step}")
+        st.divider()
+    
     # Submit Button
     if st.button("Submit Implementation Form", use_container_width=True):
         # Here you would add the logic to save the form data
