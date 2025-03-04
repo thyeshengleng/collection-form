@@ -119,6 +119,53 @@ def render_implementation_form():
         date = st.date_input("Completion Date", key=f"date_{step}")
         st.divider()
     
+    # MASTER DATA section
+    st.markdown("#### MASTER DATA (GL, AR, AP, ITEM):")
+    
+    # Master Data steps
+    master_data_steps = [
+        (9, "CHART OF ACCOUNT"),
+        (10, "DEBTOR"),
+        (11, "CREDITOR"),
+        (12, "STOCK ITEM")
+    ]
+    
+    for step, desc in master_data_steps:
+        st.markdown(f"**{step}. {desc}**")
+        status = st.selectbox(
+            "Status",
+            ["PENDING", "ERROR", "DONE"],
+            key=f"status_{step}"
+        )
+        date = st.date_input("Completion Date", key=f"date_{step}")
+        st.divider()
+    
+    # PRINTABLE LETTER DESIGN section
+    st.markdown("#### PRINTABLE LETTER DESIGN:")
+    
+    # Printable Letter Design steps
+    letter_design_steps = [
+        (13, "SALES ORDER"),
+        (14, "DELIVERY ORDER"),
+        (15, "SALES INVOICE"),
+        (16, "PICKING LIST"),
+        (17, "PURCHASE ORDER"),
+        (18, "CASH SALES"),
+        (19, "QUOTATION"),
+        (20, "OFFICIAL RECEIPT"),
+        (21, "PAYMENT VOUCHER")
+    ]
+    
+    for step, desc in letter_design_steps:
+        st.markdown(f"**{step}. {desc}**")
+        status = st.selectbox(
+            "Status",
+            ["PENDING", "ERROR", "DONE"],
+            key=f"status_{step}"
+        )
+        date = st.date_input("Completion Date", key=f"date_{step}")
+        st.divider()
+    
     # Submit Button
     if st.button("Submit Implementation Form", use_container_width=True):
         # Here you would add the logic to save the form data
