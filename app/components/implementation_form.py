@@ -29,7 +29,7 @@ def render_implementation_form():
         if step == 3:  # VPN step
             version = st.selectbox(
                 "VPN Name",
-                ["ZEROTIER", "RADMIN"],
+                ["", "ZEROTIER", "RADMIN"],
                 key=f"version_{step}"
             )
         else:
