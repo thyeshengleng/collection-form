@@ -235,12 +235,12 @@ def render_implementation_form():
     
     # Initialize additional tasks in session state if not already present
     if 'additional_tasks' not in st.session_state:
-        st.session_state.additional_tasks = ["" for _ in range(10)]
-    if 'additional_task_statuses' not in st.session_state:
-        st.session_state.additional_task_statuses = ["PENDING" for _ in range(10)]
+        st.session_state.additional_tasks = [""]
+    if 'additional_task_dates' not in st.session_state:
+        st.session_state.additional_task_dates = [None]
     
     # Create a table-like structure for additional tasks
-    for i in range(10):
+    for i in range(len(st.session_state.additional_tasks)):
         task_num = i + 1
         col1, col2 = st.columns([3, 1])
         
@@ -255,19 +255,24 @@ def render_implementation_form():
             st.session_state.additional_tasks[i] = task_desc
         
         with col2:
-            # Task status selection
-            status = st.selectbox(
-                "Result",
-                ["PENDING", "DONE", "NONE"],
-                index=["PENDING", "DONE", "NONE"].index(st.session_state.additional_task_statuses[i]),
-                key=f"additional_task_status_{i}"
+            # Date completion field instead of status
+            completion_date = st.date_input(
+                "Date Complete",
+                value=st.session_state.additional_task_dates[i],
+                key=f"additional_task_date_{i}"
             )
             # Update session state
-            st.session_state.additional_task_statuses[i] = status
+            st.session_state.additional_task_dates[i] = completion_date
         
         # Only show divider if task is not empty
         if task_desc.strip():
             st.divider()
+    
+    # Add button to add more tasks
+    if st.button("+ Add Task"):
+        st.session_state.additional_tasks.append("")
+        st.session_state.additional_task_dates.append(None)
+        st.rerun()
     
     # Submit Button
     if st.button("Submit Implementation Form", use_container_width=True):
