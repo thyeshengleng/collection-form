@@ -166,6 +166,50 @@ def render_implementation_form():
         date = st.date_input("Completion Date", key=f"date_{step}")
         st.divider()
     
+    # MIGRATION section
+    st.markdown("#### MIGRATION (OUTSTANDING BALANCE):")
+    
+    # Migration steps
+    migration_steps = [
+        (22, "DEBTOR AGING"),
+        (23, "CREDITOR AGING"),
+        (24, "TRIAL BALANCE REPORT"),
+        (25, "BALANCE SHEET REPORT"),
+        (26, "STOCK BALANCE REPORT"),
+        (27, "SO/PO OUTSTANDING")
+    ]
+    
+    for step, desc in migration_steps:
+        st.markdown(f"**{step}. {desc}**")
+        status = st.selectbox(
+            "Status",
+            ["PENDING", "DONE", "NONE"],
+            key=f"status_{step}"
+        )
+        date = st.date_input("Completion Date", key=f"date_{step}")
+        st.divider()
+    
+    # CONFIGURATION section
+    st.markdown("#### CONFIGURATION:")
+    
+    # Configuration steps
+    configuration_steps = [
+        (28, "VPN SETTING"),
+        (29, "USER ACCESS RIGHT SETTING"),
+        (30, "REPORT/COLUMN CHOOSER LAYOUT SETTING"),
+        (31, "E-INVOICE SETUP & CONFIGURATION")
+    ]
+    
+    for step, desc in configuration_steps:
+        st.markdown(f"**{step}. {desc}**")
+        status = st.selectbox(
+            "Status",
+            ["PENDING", "DONE", "NONE"],
+            key=f"status_{step}"
+        )
+        date = st.date_input("Completion Date", key=f"date_{step}")
+        st.divider()
+    
     # Submit Button
     if st.button("Submit Implementation Form", use_container_width=True):
         # Here you would add the logic to save the form data
