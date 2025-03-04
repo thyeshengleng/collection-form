@@ -60,7 +60,7 @@ def render_implementation_form():
         # For steps 5 and above, we skip the Version/Name input field as requested
         status = st.selectbox(
             "Status",
-            ["PENDING", "ERROR", "DONE"],
+            ["PENDING", "DONE", "NONE"],
             key=f"status_{step}"
         )
         date = st.date_input("Completion Date", key=f"date_{step}")
@@ -113,7 +113,7 @@ def render_implementation_form():
         # For steps 5 and above, we skip the Version/Name input field as requested
         status = st.selectbox(
             "Status",
-            ["PENDING", "ERROR", "DONE"],
+            ["PENDING", "DONE", "NONE"],
             key=f"status_{step}"
         )
         date = st.date_input("Completion Date", key=f"date_{step}")
@@ -134,7 +134,7 @@ def render_implementation_form():
         st.markdown(f"**{step}. {desc}**")
         status = st.selectbox(
             "Status",
-            ["PENDING", "ERROR", "DONE"],
+            ["PENDING", "DONE", "NONE"],
             key=f"status_{step}"
         )
         date = st.date_input("Completion Date", key=f"date_{step}")
@@ -160,7 +160,7 @@ def render_implementation_form():
         st.markdown(f"**{step}. {desc}**")
         status = st.selectbox(
             "Status",
-            ["PENDING", "ERROR", "DONE"],
+            ["PENDING", "DONE", "NONE"],
             key=f"status_{step}"
         )
         date = st.date_input("Completion Date", key=f"date_{step}")
