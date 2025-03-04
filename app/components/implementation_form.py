@@ -55,8 +55,9 @@ def render_implementation_form():
                 # Use the selected predefined option
                 version = vpn_selection
                 st.session_state[f"version_{step}"] = version
-        else:
+        elif step < 5:  # Only show Version/Name for steps 1-4
             version = st.text_input("Version/Name", key=f"version_{step}")
+        # For steps 5 and above, we skip the Version/Name input field as requested
         status = st.selectbox(
             "Status",
             ["PENDING", "ERROR", "DONE"],
@@ -107,8 +108,9 @@ def render_implementation_form():
                 # Use the selected predefined option
                 version = vpn_selection
                 st.session_state[f"version_{step}"] = version
-        else:
+        elif step < 5:  # Only show Version/Name for steps 1-4
             version = st.text_input("Version/Name", key=f"version_{step}")
+        # For steps 5 and above, we skip the Version/Name input field as requested
         status = st.selectbox(
             "Status",
             ["PENDING", "ERROR", "DONE"],
