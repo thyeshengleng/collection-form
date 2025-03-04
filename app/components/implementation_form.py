@@ -230,6 +230,45 @@ def render_implementation_form():
         date = st.date_input("Completion Date", key=f"date_{step}")
         st.divider()
     
+    # ADDITIONAL TASKS section
+    st.markdown("#### ADDITIONAL TASKS:")
+    
+    # Initialize additional tasks in session state if not already present
+    if 'additional_tasks' not in st.session_state:
+        st.session_state.additional_tasks = ["" for _ in range(10)]
+    if 'additional_task_statuses' not in st.session_state:
+        st.session_state.additional_task_statuses = ["PENDING" for _ in range(10)]
+    
+    # Create a table-like structure for additional tasks
+    for i in range(10):
+        task_num = i + 1
+        col1, col2 = st.columns([3, 1])
+        
+        with col1:
+            # Task description input
+            task_desc = st.text_input(
+                f"Task {task_num}", 
+                value=st.session_state.additional_tasks[i],
+                key=f"additional_task_{i}"
+            )
+            # Update session state
+            st.session_state.additional_tasks[i] = task_desc
+        
+        with col2:
+            # Task status selection
+            status = st.selectbox(
+                "Result",
+                ["PENDING", "DONE", "NONE"],
+                index=["PENDING", "DONE", "NONE"].index(st.session_state.additional_task_statuses[i]),
+                key=f"additional_task_status_{i}"
+            )
+            # Update session state
+            st.session_state.additional_task_statuses[i] = status
+        
+        # Only show divider if task is not empty
+        if task_desc.strip():
+            st.divider()
+    
     # Submit Button
     if st.button("Submit Implementation Form", use_container_width=True):
         # Here you would add the logic to save the form data
