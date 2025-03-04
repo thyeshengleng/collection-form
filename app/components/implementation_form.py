@@ -27,11 +27,34 @@ def render_implementation_form():
         st.markdown(f"**{step}. {desc}**")
         # Special handling for VPN step
         if step == 3:  # VPN step
-            version = st.selectbox(
+            # Replace selectbox with text_input that has suggestions
+            vpn_options = ["", "ZEROTIER", "RADMIN"]
+            default_vpn = st.session_state.get(f"version_{step}", "")
+            
+            # Create a container for the custom input solution
+            vpn_container = st.container()
+            
+            # Add a selectbox for predefined options with an "Other" option
+            vpn_selection = vpn_container.selectbox(
                 "VPN Name",
-                ["", "ZEROTIER", "RADMIN"],
-                key=f"version_{step}"
+                vpn_options + ["Other (specify)"],
+                index=vpn_options.index(default_vpn) if default_vpn in vpn_options else 0,
+                key=f"vpn_selection_{step}"
             )
+            
+            # Show text input if "Other" is selected
+            if vpn_selection == "Other (specify)":
+                version = vpn_container.text_input(
+                    "Enter custom VPN name",
+                    value=st.session_state.get(f"custom_vpn_{step}", ""),
+                    key=f"custom_vpn_{step}"
+                )
+                # Store the custom value in the original key for consistency
+                st.session_state[f"version_{step}"] = version
+            else:
+                # Use the selected predefined option
+                version = vpn_selection
+                st.session_state[f"version_{step}"] = version
         else:
             version = st.text_input("Version/Name", key=f"version_{step}")
         status = st.selectbox(
@@ -56,11 +79,34 @@ def render_implementation_form():
         st.markdown(f"**{step}. {desc}**")
         # Special handling for VPN step
         if step == 3:  # VPN step
-            version = st.selectbox(
+            # Replace selectbox with text_input that has suggestions
+            vpn_options = ["", "ZEROTIER", "RADMIN"]
+            default_vpn = st.session_state.get(f"version_{step}", "")
+            
+            # Create a container for the custom input solution
+            vpn_container = st.container()
+            
+            # Add a selectbox for predefined options with an "Other" option
+            vpn_selection = vpn_container.selectbox(
                 "VPN Name",
-                ["", "ZEROTIER", "RADMIN"],
-                key=f"version_{step}"
+                vpn_options + ["Other (specify)"],
+                index=vpn_options.index(default_vpn) if default_vpn in vpn_options else 0,
+                key=f"vpn_selection_{step}"
             )
+            
+            # Show text input if "Other" is selected
+            if vpn_selection == "Other (specify)":
+                version = vpn_container.text_input(
+                    "Enter custom VPN name",
+                    value=st.session_state.get(f"custom_vpn_{step}", ""),
+                    key=f"custom_vpn_{step}"
+                )
+                # Store the custom value in the original key for consistency
+                st.session_state[f"version_{step}"] = version
+            else:
+                # Use the selected predefined option
+                version = vpn_selection
+                st.session_state[f"version_{step}"] = version
         else:
             version = st.text_input("Version/Name", key=f"version_{step}")
         status = st.selectbox(
