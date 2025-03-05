@@ -253,8 +253,6 @@ def render_implementation_form():
         with col2:
             date = st.date_input("Date Complete", key=f"{key}_date")
     
-        st.divider()
-    
     # ADDITIONAL TASKS section
     st.markdown("#### ADDITIONAL TASKS:")
     
