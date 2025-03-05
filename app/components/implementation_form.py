@@ -118,7 +118,6 @@ def render_implementation_form():
         )
         date = st.date_input("Completion Date", key=f"date_{step}")
         st.divider()
-        st.divider()
     
     # MASTER DATA section
     st.markdown("#### MASTER DATA (GL, AR, AP, ITEM):")
@@ -229,6 +228,7 @@ def render_implementation_form():
             key=f"status_{step}"
         )
         date = st.date_input("Completion Date", key=f"date_{step}")
+        st.divider()
     
     # AUTOCOUNT SERVER / DATABASE INFO section
     st.markdown("#### AUTOCOUNT SERVER / DATABASE INFO:")
