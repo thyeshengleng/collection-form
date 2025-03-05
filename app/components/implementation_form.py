@@ -118,6 +118,7 @@ def render_implementation_form():
         )
         date = st.date_input("Completion Date", key=f"date_{step}")
         st.divider()
+        st.divider()
     
     # MASTER DATA section
     st.markdown("#### MASTER DATA (GL, AR, AP, ITEM):")
