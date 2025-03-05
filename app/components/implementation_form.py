@@ -228,7 +228,6 @@ def render_implementation_form():
             key=f"status_{step}"
         )
         date = st.date_input("Completion Date", key=f"date_{step}")
-        st.divider()
     
     # AUTOCOUNT SERVER / DATABASE INFO section
     st.markdown("#### AUTOCOUNT SERVER / DATABASE INFO:")
@@ -242,23 +241,17 @@ def render_implementation_form():
         (5, "RADMIN VPN :", "radmin_vpn")
     ]
     
-    # Create a table with headers
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.markdown("**Info**")
-    with col2:
-        st.markdown("**DATE COMPLETE**")
-    
     # Display each server info field with date
     for num, label, key in server_info:
+        st.markdown(f"**{num}. {label}**")
         col1, col2 = st.columns([3, 1])
         
         with col1:
-            value = st.text_input(label, key=key)
+            value = st.text_input("Value", key=key)
         
         with col2:
-            date = st.date_input("Date", key=f"{key}_date")
-        
+            date = st.date_input("Date Complete", key=f"{key}_date")
+    
         st.divider()
     
     # ADDITIONAL TASKS section
