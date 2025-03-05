@@ -274,6 +274,37 @@ def render_implementation_form():
         st.session_state.additional_task_dates.append(None)
         st.rerun()
     
+    # AUTOCOUNT SERVER / DATABASE INFO section
+    st.markdown("#### AUTOCOUNT SERVER / DATABASE INFO:")
+    
+    # Create a table-like structure for server info
+    server_info = [
+        (1, "SERVER NAME:", "server_name"),
+        (2, "DATABASE NAME:", "database_name"),
+        (3, "PRODUCT ID :", "product_id"),
+        (4, "ACCESS KEY:", "access_key"),
+        (5, "RADMIN VPN :", "radmin_vpn")
+    ]
+    
+    # Create a table with headers
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown("**Info**")
+    with col2:
+        st.markdown("**DATE COMPLETE**")
+    
+    # Display each server info field with date
+    for num, label, key in server_info:
+        col1, col2 = st.columns([3, 1])
+        
+        with col1:
+            value = st.text_input(label, key=key)
+        
+        with col2:
+            date = st.date_input("Date", key=f"{key}_date")
+        
+        st.divider()
+    
     # Submit Button
     if st.button("Submit Implementation Form", use_container_width=True):
         # Here you would add the logic to save the form data
